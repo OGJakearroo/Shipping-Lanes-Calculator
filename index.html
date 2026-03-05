@@ -279,7 +279,7 @@
   <div class="header-top">
     <div>
       <div class="title">&#9875; <span id="hdr-current-ship">—</span> &rarr; <span id="hdr-target-ship">—</span></div>
-      <div class="subtitle" id="hdr-subtitle">ROBLOX SHIPPING LANES &middot; GRIND TRACKER</div>
+      <div class="subtitle">ROBLOX SHIPPING LANES &middot; GRIND TRACKER &middot; <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;opacity:0.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">WIKI &#8599;</a></div>
     </div>
     <div class="header-actions">
       <span class="save-badge" id="save-badge">&#9679; SAVED</span>
@@ -343,9 +343,8 @@
           <div><div class="pred-label">TRIPS AFTER SELLING</div><div class="pred-val" style="color:var(--cyan)" id="pred-after-trips">—</div></div>
         </div>
         <div class="prediction-footer">
-          <div class="pred-label">PROJECTED <span id="pred-target-ship-label">TARGET SHIP</span> DATE</div>
-          <div style="color:var(--cyan);font-size:0.92rem;font-weight:600;margin-top:4px;font-family:var(--mono)" id="pred-date">—</div>
-          <div style="color:var(--muted);font-size:0.72rem;margin-top:4px;font-family:var(--mono)" id="pred-total">—</div>
+          <div class="pred-label">TOTAL TO <span id="pred-target-ship-label">TARGET SHIP</span></div>
+          <div style="color:var(--cyan);font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="pred-total">—</div>
         </div>
       </div>
 
@@ -457,7 +456,7 @@
             onblur="saveSettings()">
         </div>
         <div class="field">
-          <div class="field-label">Profit per NM ($/NM)</div>
+          <div class="field-label">Average Profit per NM ($/NM)</div>
           <div class="field-hint">Your current ship's per-nautical-mile earnings rate</div>
           <input type="text" id="set-profit-nm" placeholder="e.g. 340,000" oninput="saveSettings()" onblur="formatInput(this)">
         </div>
@@ -541,6 +540,7 @@
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
+const BUILD_DATE   = '2026-03-05';
 const STORAGE_KEY  = 'shipping-grind-v2';
 const SETTINGS_KEY = 'shipping-grind-settings-v2';
 const THEME_KEY    = 'shipping-grind-theme';
@@ -700,27 +700,29 @@ function render() {
   document.getElementById('stat-time').textContent    = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
 
   // Prediction
-  const afterSale  = latest.balance + currentSale;
-  const stillAfter = Math.max(0, targetPrice - afterSale);
-  const tripsAfter = avgNet > 0 ? Math.max(0, Math.ceil(stillAfter / avgNet)) : 0;
-  const projFinish = new Date(Date.now() + minsToSell * 60000);
-  const durLabel   = timed.length < 2 ? ' (limited data)' : '';
+  // "Trips after selling" = if you sold NOW, how many more trips to target price
+  const afterSaleNow  = latest.balance + currentSale;
+  const stillAfterNow = Math.max(0, targetPrice - afterSaleNow);
+  const tripsAfter    = avgNet > 0 ? Math.max(0, Math.ceil(stillAfterNow / avgNet)) : 0;
+  // Total to target = trips to sell point + trips from (sellPoint + resale) to targetPrice
+  const balAfterSell      = sellPoint + currentSale;
+  const stillForTarget    = Math.max(0, targetPrice - balAfterSell);
+  const tripsForTarget    = avgNet > 0 ? Math.ceil(stillForTarget / avgNet) : 0;
+  const totalTrips        = tripsToSell + tripsForTarget;
+  const totalHours        = (totalTrips * avgDur) / 60;
+  const durLabel          = timed.length < 2 ? ' (est.)' : '';
 
   document.getElementById('pred-label').textContent =
     `SMART PREDICTION \u00B7 ${completed.length} runs, avg ${avgDur.toFixed(0)} min/trip`;
-  document.getElementById('pred-avg-net').textContent     = fmts(avgNet);
-  document.getElementById('pred-avg-dur').textContent     = `${avgDur.toFixed(0)} min${durLabel}`;
-  document.getElementById('pred-current-ship').textContent = (currentShip || 'CURRENT SHIP').toUpperCase();
-  document.getElementById('pred-sale-val').textContent    = currentSale > 0 ? fmt(currentSale) : '—';
-  document.getElementById('pred-after-trips').textContent = avgNet > 0 ? `~${tripsAfter} more trips` : '—';
+  document.getElementById('pred-avg-net').textContent      = fmts(avgNet);
+  document.getElementById('pred-avg-dur').textContent      = `${avgDur.toFixed(0)} min${durLabel}`;
+  document.getElementById('pred-current-ship').textContent  = (currentShip || 'CURRENT SHIP').toUpperCase();
+  document.getElementById('pred-sale-val').textContent     = currentSale > 0 ? fmt(currentSale) : '—';
+  document.getElementById('pred-after-trips').textContent  = avgNet > 0 ? `~${tripsAfter} more trips` : '—';
   document.getElementById('pred-target-ship-label').textContent = (targetShip || 'TARGET SHIP').toUpperCase();
-  document.getElementById('pred-date').textContent = avgNet > 0
-    ? projFinish.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' }) +
-      ' \u00B7 ~' + projFinish.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
-    : 'Log more runs for a prediction';
   document.getElementById('pred-total').textContent = avgNet > 0
-    ? `Total ~${tripsToSell + tripsAfter} trips \u00B7 ~${((tripsToSell + tripsAfter) * avgDur / 60).toFixed(1)} hours of grinding`
-    : '';
+    ? `~${totalTrips} trips \u00B7 ~${totalHours.toFixed(1)} hrs of grinding`
+    : 'Log more runs for a prediction';
 
   // Log hint
   document.getElementById('log-hint').textContent =
@@ -1092,11 +1094,19 @@ function applySettings(silent = false) {
 }
 
 // ── EXPORT / IMPORT ────────────────────────────────────────────────────────
+function exportStamp() {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 5).replace(':', 'h') + 'm';
+  const ship = (settings.currentShip || 'grind').replace(/\s+/g, '-').toLowerCase();
+  return `${ship}_${date}_${time}`;
+}
+
 function exportJSON() {
   const data = JSON.stringify({ runs, settings }, null, 2);
   const a = document.createElement('a');
   a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
-  a.download = `shipping-grind-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `shipping-${exportStamp()}.json`;
   a.click();
 }
 
@@ -1106,7 +1116,7 @@ function exportCSV() {
   const csv = rows.map(r => r.join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `shipping-runs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `shipping-${exportStamp()}.csv`;
   a.click();
 }
 
@@ -1179,6 +1189,13 @@ if (runs.length === 0) {
 }
 
 window.addEventListener('resize', () => { if (runs.length > 0) render(); });
+
+// Build date footer
+document.body.insertAdjacentHTML('beforeend',
+  `<div style="text-align:center;padding:16px 0 24px;font-size:0.65rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.1em">
+    BUILD ${BUILD_DATE} &nbsp;&middot;&nbsp;
+    <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.8">SHIPPING LANES WIKI &#8599;</a>
+  </div>`);
 </script>
 </body>
 </html>
