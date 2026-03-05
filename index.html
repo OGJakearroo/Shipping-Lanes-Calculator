@@ -191,7 +191,7 @@
   .totals-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.78rem; font-family: var(--mono); }
 
   /* ── CHART ── */
-  #chart-container { width: 100%; height: 220px; }
+  #chart-container { width: 100%; height: 250px; }
 
   /* ── ERROR ── */
   .error { color: var(--red); font-size: 0.78rem; margin-top: 8px; font-family: var(--mono); }
@@ -266,7 +266,7 @@
     <div class="field">
       <div class="field-label">Starting Balance ($)</div>
       <div class="field-hint">Your balance right now in-game</div>
-      <input type="text" id="modal-balance" placeholder="e.g. 55000000" onkeydown="if(event.key==='Enter')confirmStartBalance()">
+      <input type="text" id="modal-balance" placeholder="e.g. 55,000,000" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')confirmStartBalance()">
     </div>
     <div class="error" id="modal-error" style="display:none"></div>
     <div class="modal-footer">
@@ -350,7 +350,7 @@
       </div>
 
       <div class="card">
-        <div class="card-label">BALANCE PROGRESSION + PROJECTION</div>
+        <div class="card-label">BALANCE PROGRESSION + PROJECTION &nbsp;<span style="color:var(--purple);font-size:0.65rem">&#9646; TRIP DURATION (min)</span></div>
         <div id="chart-container"></div>
       </div>
     </div>
@@ -365,12 +365,12 @@
       <div class="field">
         <div class="field-label">New Balance ($)</div>
         <div class="field-hint">Your total balance after unloading cargo</div>
-        <input type="text" id="inp-balance" placeholder="e.g. 63000000" oninput="updatePreview()" onkeydown="if(event.key==='Enter')logRun()">
+        <input type="text" id="inp-balance" placeholder="e.g. 63,000,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
       </div>
       <div class="field">
         <div class="field-label">Fuel Cost ($)</div>
         <div class="field-hint">Amount spent refuelling this trip</div>
-        <input type="text" id="inp-fuel" placeholder="e.g. 370000" oninput="updatePreview()" onkeydown="if(event.key==='Enter')logRun()">
+        <input type="text" id="inp-fuel" placeholder="e.g. 370,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
       </div>
 
       <div class="field">
@@ -406,10 +406,11 @@
   <!-- HISTORY -->
   <div class="tab-pane" id="tab-history">
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div class="card-label" id="hist-label">RUN HISTORY</div>
         <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 12px" onclick="undoLast()">UNDO LAST</button>
       </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, and Duration are editable.</div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -446,7 +447,7 @@
         <div class="field">
           <div class="field-label">Resale Value ($)</div>
           <div class="field-hint">What you'll get when you sell it (typically 30% of purchase price)</div>
-          <input type="text" id="set-current-sale" placeholder="e.g. 13800000" oninput="calcSellPoint()">
+          <input type="text" id="set-current-sale" placeholder="e.g. 13,800,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
           <div class="field-label">Sell-Point Balance ($)</div>
@@ -458,7 +459,7 @@
         <div class="field">
           <div class="field-label">Profit per NM ($/NM)</div>
           <div class="field-hint">Your current ship's per-nautical-mile earnings rate</div>
-          <input type="text" id="set-profit-nm" placeholder="e.g. 340000" oninput="saveSettings()">
+          <input type="text" id="set-profit-nm" placeholder="e.g. 340,000" oninput="saveSettings()" onblur="formatInput(this)">
         </div>
       </div>
     </div>
@@ -474,12 +475,12 @@
         <div class="field">
           <div class="field-label">Target Ship Price ($)</div>
           <div class="field-hint">Full purchase price of the target ship</div>
-          <input type="text" id="set-target-price" placeholder="e.g. 245000000" oninput="calcSellPoint()">
+          <input type="text" id="set-target-price" placeholder="e.g. 245,000,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
           <div class="field-label">Target Ship Profit/NM</div>
           <div class="field-hint">For earnings comparison once you upgrade</div>
-          <input type="text" id="set-target-profit-nm" placeholder="e.g. 787500" oninput="saveSettings()">
+          <input type="text" id="set-target-profit-nm" placeholder="e.g. 787,500" oninput="saveSettings()" onblur="formatInput(this)">
         </div>
         <div class="field">
           <div class="field-label">Cargo Type</div>
@@ -490,27 +491,11 @@
     </div>
 
     <div class="card settings-section">
-      <div class="settings-title">Route Info</div>
-      <div class="settings-grid">
-        <div class="field">
-          <div class="field-label">Route Name</div>
-          <div class="field-hint">A label for the route you're running</div>
-          <input type="text" id="set-route" placeholder="e.g. Rockfall to Wilmington Cove" oninput="saveSettings()">
-        </div>
-        <div class="field">
-          <div class="field-label">Route Distance (NM paid)</div>
-          <div class="field-hint">Straight-line distance you get paid for per trip</div>
-          <input type="text" id="set-distance" placeholder="e.g. 26.1" oninput="saveSettings()">
-        </div>
-      </div>
-    </div>
-
-    <div class="card settings-section">
       <div class="settings-title">Starting Balance</div>
       <div class="field">
         <div class="field-label">Starting Balance ($)</div>
         <div class="field-hint">Your balance at the beginning of this grind session. Changing this will update the Start entry in your history.</div>
-        <input type="text" id="set-start-balance" placeholder="e.g. 55301835" oninput="saveSettings()">
+        <input type="text" id="set-start-balance" placeholder="e.g. 55,301,835" oninput="saveSettings()" onblur="formatInput(this)">
       </div>
     </div>
 
@@ -569,8 +554,6 @@ const DEFAULT_SETTINGS = {
   targetPrice: 0,
   targetProfitNM: 0,
   cargo: '',
-  route: '',
-  distance: 0,
   startBalance: 0,
 };
 
@@ -652,6 +635,12 @@ const pn   = s => parseFloat(String(s).replace(/,/g, ''));
 const fmt  = v => `$${(v / 1e6).toFixed(2)}M`;
 const fmts = v => `$${(v / 1e6).toFixed(1)}M`;
 const fmtf = v => `$${Math.round(v).toLocaleString()}`;
+const fmtNum = v => (v && !isNaN(v) && Number(v) > 0) ? Math.round(Number(v)).toLocaleString() : '';
+
+function formatInput(el) {
+  const v = pn(el.value);
+  if (!isNaN(v) && v > 0) el.value = Math.round(v).toLocaleString();
+}
 
 function calcDuration(s, e) {
   if (!s || !e) return null;
@@ -740,14 +729,14 @@ function render() {
 
   // History
   const tbody = document.getElementById('history-tbody');
-  tbody.innerHTML = runs.map(r => `
+  tbody.innerHTML = runs.map((r, idx) => `
     <tr>
-      <td class="left" style="color:var(--cyan)">${r.run}</td>
-      <td class="right">${fmt(r.balance)}</td>
-      <td class="right" style="color:var(--red)">${r.fuel ? '-' + fmt(r.fuel) : '\u2014'}</td>
+      <td class="left" style="color:var(--cyan);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'run')">${r.run}</td>
+      <td class="right" style="cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'balance')">${fmt(r.balance)}</td>
+      <td class="right" style="color:var(--red);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'fuel')">${r.fuel ? '-' + fmt(r.fuel) : '\u2014'}</td>
       <td class="right">${r.gross ? fmt(r.gross) : '\u2014'}</td>
       <td class="right" style="color:${r.net > 0 ? 'var(--green)' : 'var(--red)'}">${r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014'}</td>
-      <td class="right" style="color:var(--purple)">${r.duration ? r.duration + 'm' : '\u2014'}</td>
+      <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
     </tr>`).join('');
 
   document.getElementById('hist-label').textContent = `RUN HISTORY \u00B7 ${completed.length} runs logged`;
@@ -784,6 +773,7 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   const clrProj   = isLight ? '#0277bd66' : '#4fc3f744';
   const clrSell   = isLight ? '#bf5e00' : '#ffa726';
   const clrTarget = isLight ? '#2e7d32' : '#66bb6a';
+  const clrDur    = isLight ? '#6a1b9a' : '#ab47bc';
 
   // Build data points
   const actual = runs.map((r, i) => ({ x: i, y: r.balance, label: r.run }));
@@ -800,7 +790,10 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   const maxY  = Math.max(...allY, targetPrice || 0, sellPoint || 0) * 1.05 || 1;
   const totalX = actual.length + proj.length - 1 || 1;
 
-  const PAD = { l: 60, r: 16, t: 14, b: 28 };
+  const timedRuns = runs.filter(r => r.duration);
+  const maxDur    = timedRuns.length ? Math.max(...timedRuns.map(r => r.duration)) : 0;
+  const hasDur    = maxDur > 0;
+  const PAD = { l: 60, r: hasDur ? 52 : 16, t: 14, b: 28 };
   const gW  = W - PAD.l - PAD.r;
   const gH  = H - PAD.t - PAD.b;
 
@@ -860,6 +853,33 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
     ctx.fillStyle = clrActual; ctx.fill();
   });
   ctx.restore();
+
+  // Duration bars (right y-axis)
+  if (hasDur) {
+    const yOfDur = d => PAD.t + gH - (d / maxDur) * gH;
+    const BAR_W  = Math.max(4, Math.min(10, gW / (runs.length * 2)));
+
+    runs.forEach((r, i) => {
+      if (!r.duration) return;
+      const x    = xOf(i);
+      const barH = (r.duration / maxDur) * gH;
+      ctx.save();
+      ctx.fillStyle = clrDur + '55';
+      ctx.strokeStyle = clrDur + 'aa';
+      ctx.lineWidth = 1;
+      ctx.fillRect(x - BAR_W / 2, PAD.t + gH - barH, BAR_W, barH);
+      ctx.strokeRect(x - BAR_W / 2, PAD.t + gH - barH, BAR_W, barH);
+      ctx.restore();
+    });
+
+    // Right axis labels
+    ctx.fillStyle = clrDur; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'left';
+    for (let i = 0; i <= 4; i++) {
+      const d = maxDur * (1 - i / 4);
+      const y = PAD.t + (i / 4) * gH;
+      ctx.fillText(Math.round(d) + 'm', W - PAD.r + 4, y + 3);
+    }
+  }
 
   // X labels
   ctx.fillStyle = clrLabel; ctx.font = '8px JetBrains Mono,monospace'; ctx.textAlign = 'center';
@@ -937,6 +957,67 @@ function undoLast() {
   if (runs.length > 1) { runs.pop(); save(); render(); }
 }
 
+// ── HISTORY EDITING ────────────────────────────────────────────────────────
+function recalcRuns() {
+  for (let i = 1; i < runs.length; i++) {
+    runs[i].net   = runs[i].balance - runs[i - 1].balance;
+    runs[i].gross = runs[i].net + runs[i].fuel;
+  }
+}
+
+function editCell(e, idx, field) {
+  const td = e.currentTarget;
+  if (td.querySelector('input')) return; // already editing
+  const r = runs[idx];
+  let rawVal = '';
+  if (field === 'balance')  rawVal = r.balance || '';
+  if (field === 'fuel')     rawVal = r.fuel    || '';
+  if (field === 'duration') rawVal = r.duration || '';
+  if (field === 'run')      rawVal = r.run;
+
+  const inp = document.createElement('input');
+  inp.type  = 'text';
+  inp.value = rawVal;
+  inp.style.cssText = `
+    width:100%;min-width:80px;background:var(--input-bg);
+    border:1px solid var(--cyan);border-radius:3px;
+    padding:3px 6px;color:var(--text);font-family:var(--mono);
+    font-size:0.78rem;text-align:${field === 'run' ? 'left' : 'right'};outline:none;
+  `;
+  inp.onblur    = () => saveCell(idx, field, inp.value);
+  inp.onkeydown = ev => {
+    if (ev.key === 'Enter') inp.blur();
+    if (ev.key === 'Escape') render();
+  };
+  td.textContent = '';
+  td.appendChild(inp);
+  inp.focus();
+  inp.select();
+}
+
+function saveCell(idx, field, rawValue) {
+  const r = runs[idx];
+  if (field === 'run') {
+    const v = rawValue.trim();
+    if (v) r.run = v;
+  } else if (field === 'balance') {
+    const v = pn(rawValue);
+    if (!isNaN(v) && v >= 0) { r.balance = v; recalcRuns(); }
+  } else if (field === 'fuel') {
+    const v = pn(rawValue);
+    if (!isNaN(v) && v >= 0) {
+      r.fuel  = v;
+      r.net   = r.balance - (runs[idx - 1]?.balance ?? r.balance);
+      r.gross = r.net + r.fuel;
+    }
+  } else if (field === 'duration') {
+    const v = parseInt(rawValue);
+    r.duration = (!isNaN(v) && v > 0) ? v : null;
+  }
+  save();
+  render();
+}
+
 function resetAll() {
   if (!confirm('Reset all run data? Settings will be kept.')) return;
   runs = [];
@@ -950,7 +1031,7 @@ function calcSellPoint() {
   const price = pn(document.getElementById('set-target-price').value);
   if (!isNaN(sale) && !isNaN(price) && sale >= 0 && price > 0) {
     const sp = Math.max(0, price - sale);
-    document.getElementById('set-sell-point').value = sp;
+    document.getElementById('set-sell-point').value = Math.round(sp).toLocaleString();
   }
   saveSettings();
 }
@@ -958,23 +1039,21 @@ function calcSellPoint() {
 // ── SETTINGS ──────────────────────────────────────────────────────────────
 function loadSettingsToForm() {
   document.getElementById('set-current-ship').value     = settings.currentShip    || '';
-  document.getElementById('set-current-sale').value     = settings.currentSale    || '';
-  document.getElementById('set-sell-point').value       = settings.sellPoint      || '';
-  document.getElementById('set-profit-nm').value        = settings.profitNM       || '';
+  document.getElementById('set-current-sale').value     = fmtNum(settings.currentSale)    || '';
+  document.getElementById('set-sell-point').value       = fmtNum(settings.sellPoint)      || '';
+  document.getElementById('set-profit-nm').value        = fmtNum(settings.profitNM)       || '';
   document.getElementById('set-target-ship').value      = settings.targetShip     || '';
-  document.getElementById('set-target-price').value     = settings.targetPrice    || '';
-  document.getElementById('set-target-profit-nm').value = settings.targetProfitNM || '';
+  document.getElementById('set-target-price').value     = fmtNum(settings.targetPrice)    || '';
+  document.getElementById('set-target-profit-nm').value = fmtNum(settings.targetProfitNM) || '';
   document.getElementById('set-cargo').value            = settings.cargo          || '';
-  document.getElementById('set-route').value            = settings.route          || '';
-  document.getElementById('set-distance').value         = settings.distance       || '';
-  document.getElementById('set-start-balance').value    = settings.startBalance   || '';
+  document.getElementById('set-start-balance').value    = fmtNum(settings.startBalance)   || '';
   // Reflect auto-calculated sell point (don't override if already set)
   if (settings.sellPoint) {
-    document.getElementById('set-sell-point').value = settings.sellPoint;
+    document.getElementById('set-sell-point').value = Math.round(settings.sellPoint).toLocaleString();
   } else {
     const sale  = settings.currentSale  || 0;
     const price = settings.targetPrice  || 0;
-    if (price > 0) document.getElementById('set-sell-point').value = Math.max(0, price - sale);
+    if (price > 0) document.getElementById('set-sell-point').value = Math.round(Math.max(0, price - sale)).toLocaleString();
   }
 }
 
@@ -994,8 +1073,6 @@ function applySettings(silent = false) {
   if (!isNaN(g('set-target-price'))     && g('set-target-price')     >= 0) settings.targetPrice     = g('set-target-price');
   if (!isNaN(g('set-target-profit-nm')) && g('set-target-profit-nm') >= 0) settings.targetProfitNM = g('set-target-profit-nm');
   if (gs('set-cargo'))           settings.cargo          = gs('set-cargo');
-  if (gs('set-route'))           settings.route          = gs('set-route');
-  if (!isNaN(g('set-distance'))  && g('set-distance')    >= 0) settings.distance = g('set-distance');
 
   const newStartBal = g('set-start-balance');
   if (!isNaN(newStartBal) && newStartBal >= 0 && newStartBal !== settings.startBalance) {
