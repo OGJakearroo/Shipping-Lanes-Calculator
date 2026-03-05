@@ -1147,13 +1147,10 @@ function saveCell(idx, field, rawValue) {
 }
 
 function resetAll() {
-  if (!confirm('Reset all run data? This will clear your history.')) return;
-  const clearSettings = confirm('Also reset ship settings (ship name, prices, cargo, etc.)?');
+  if (!confirm('Reset everything?\n\nThis will clear your run history AND all ship settings (ship name, prices, cargo, etc.).\n\nOK = Reset everything\nCancel = Do nothing')) return;
   runs = [];
-  if (clearSettings) {
-    settings = { ...DEFAULT_SETTINGS };
-    loadSettingsToForm();
-  }
+  settings = { ...DEFAULT_SETTINGS };
+  loadSettingsToForm();
   save();
   render();
   showStartBalanceModal();
