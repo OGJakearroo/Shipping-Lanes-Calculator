@@ -122,6 +122,7 @@
   .field { margin-bottom: 16px; }
   .field-label { font-size: 0.75rem; font-weight: 600; color: var(--text); letter-spacing: 0.05em; margin-bottom: 4px; }
   .field-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+  .log-hint-tooltip { display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent); border-radius: 20px; padding: 5px 12px; font-size: 0.72rem; font-family: var(--mono); color: var(--cyan); margin-bottom: 16px; }
   input[type=text], input[type=number], input[type=time], select, textarea {
     width: 100%;
     background: var(--input-bg);
@@ -249,6 +250,17 @@
     line-height: 1.5;
   }
   .modal-footer { margin-top: 20px; }
+  .onboard-steps { display: flex; gap: 6px; margin-bottom: 20px; }
+  .onboard-step { height: 3px; flex: 1; border-radius: 2px; background: var(--border2); transition: background 0.3s; }
+  .onboard-step.active { background: var(--cyan); }
+  .onboard-step.done { background: var(--green); }
+  .onboard-pane { display: none; }
+  .onboard-pane.visible { display: block; }
+  .wiki-link { font-size: 0.7rem; color: var(--cyan); text-decoration: none; opacity: 0.8; }
+  .wiki-link:hover { opacity: 1; text-decoration: underline; }
+  .onboard-skip { background: none; border: none; color: var(--muted); font-size: 0.72rem; cursor: pointer; padding: 0; text-decoration: underline; }
+  .onboard-skip:hover { color: var(--text); }
+  .modal-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; gap: 10px; }
 
   @media (max-width: 480px) {
     .grid-2, .grid-4, .settings-grid, .export-grid, .grid-2-input, .preview-grid, .totals-row { grid-template-columns: 1fr; }
@@ -258,19 +270,80 @@
 </head>
 <body>
 
-<!-- STARTING BALANCE MODAL -->
+<!-- ONBOARDING MODAL -->
 <div class="modal-backdrop hidden" id="modal-backdrop">
   <div class="modal">
-    <div class="modal-title">Welcome to the Grind Tracker</div>
-    <div class="modal-subtitle">Enter your current in-game balance to get started. You can change this later in Settings.</div>
-    <div class="field">
-      <div class="field-label">Starting Balance ($)</div>
-      <div class="field-hint">Your balance right now in-game</div>
-      <input type="text" id="modal-balance" placeholder="e.g. 55,000,000" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')confirmStartBalance()">
+    <div class="onboard-steps">
+      <div class="onboard-step active" id="ob-dot-0"></div>
+      <div class="onboard-step" id="ob-dot-1"></div>
+      <div class="onboard-step" id="ob-dot-2"></div>
     </div>
-    <div class="error" id="modal-error" style="display:none"></div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" style="width:100%" onclick="confirmStartBalance()">START TRACKING</button>
+
+    <!-- Step 1: Balance -->
+    <div class="onboard-pane visible" id="ob-pane-0">
+      <div class="modal-title">Welcome to the Grind Tracker</div>
+      <div class="modal-subtitle">Track your Shipping Lanes grind, predict when you can afford your next ship, and export your data. Let's get you set up.</div>
+      <div class="field">
+        <div class="field-label">Your Current Balance ($)</div>
+        <div class="field-hint">Open Roblox and check your balance in-game right now</div>
+        <input type="text" id="modal-balance" placeholder="e.g. 55,000,000" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')obNext(0)">
+      </div>
+      <div class="error" id="modal-error" style="display:none"></div>
+      <div class="modal-nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="obNext(0)">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Current ship -->
+    <div class="onboard-pane" id="ob-pane-1">
+      <div class="modal-title">Your Current Ship</div>
+      <div class="modal-subtitle">This helps calculate how much you'll earn from selling it when you upgrade. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="field">
+        <div class="field-label">Ship Name</div>
+        <div class="field-hint">e.g. Handysize, Capesize, VLCC</div>
+        <input type="text" id="ob-current-ship" placeholder="e.g. Capesize">
+      </div>
+      <div class="field">
+        <div class="field-label">Resale Value ($)</div>
+        <div class="field-hint">What your current ship sells for — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">Ships wiki page</a> for values</div>
+        <input type="text" id="ob-current-sale" placeholder="e.g. 28,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
+      </div>
+      <div class="modal-nav">
+        <button class="onboard-skip" onclick="obBack(1)">&larr; Back</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="onboard-skip" onclick="obSkip(1)">Skip</button>
+          <button class="btn btn-primary" onclick="obNext(1)">Next &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Target ship -->
+    <div class="onboard-pane" id="ob-pane-2">
+      <div class="modal-title">Your Target Ship</div>
+      <div class="modal-subtitle">The ship you're grinding toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="field">
+        <div class="field-label">Target Ship Name</div>
+        <div class="field-hint">e.g. VLCC, Ore Carrier</div>
+        <input type="text" id="ob-target-ship" placeholder="e.g. VLCC">
+      </div>
+      <div class="field">
+        <div class="field-label">Target Ship Price ($)</div>
+        <div class="field-hint">The purchase price of the ship you want — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">Ships wiki page</a></div>
+        <input type="text" id="ob-target-price" placeholder="e.g. 150,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
+      </div>
+      <div class="field" id="ob-sellpoint-field" style="display:none">
+        <div class="field-label">Sell Point</div>
+        <div class="field-hint">Reach this balance, then sell your current ship to afford the upgrade</div>
+        <input type="text" id="ob-sell-point" readonly style="opacity:0.7;cursor:default">
+      </div>
+      <div class="modal-nav">
+        <button class="onboard-skip" onclick="obBack(2)">&larr; Back</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="onboard-skip" onclick="obSkip(2)">Skip</button>
+          <button class="btn btn-primary" onclick="obFinish()">Start Tracking</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -359,7 +432,7 @@
   <div class="tab-pane" id="tab-log">
     <div class="card">
       <div class="card-label">LOG NEW RUN</div>
-      <div class="field-hint" id="log-hint" style="margin-bottom:16px;color:var(--cyan)"></div>
+      <div id="log-hint" class="log-hint-tooltip" style="display:none"></div>
 
       <div class="field">
         <div class="field-label">New Balance ($)</div>
@@ -597,22 +670,67 @@ function loadTheme() {
   }
 }
 
-// ── STARTING BALANCE MODAL ─────────────────────────────────────────────────
+// ── ONBOARDING MODAL ───────────────────────────────────────────────────────
 function showStartBalanceModal() {
+  obGoto(0);
   document.getElementById('modal-backdrop').classList.remove('hidden');
   document.getElementById('modal-balance').value = '';
   document.getElementById('modal-error').style.display = 'none';
   setTimeout(() => document.getElementById('modal-balance').focus(), 100);
 }
 
-function confirmStartBalance() {
-  const errEl = document.getElementById('modal-error');
-  const val = pn(document.getElementById('modal-balance').value);
-  if (isNaN(val) || val < 0) {
-    errEl.textContent = 'Please enter a valid balance.';
-    errEl.style.display = 'block';
-    return;
+function obGoto(step) {
+  [0,1,2].forEach(i => {
+    document.getElementById(`ob-pane-${i}`).classList.toggle('visible', i === step);
+    const dot = document.getElementById(`ob-dot-${i}`);
+    dot.classList.toggle('active', i === step);
+    dot.classList.toggle('done', i < step);
+  });
+}
+
+function obNext(step) {
+  if (step === 0) {
+    const errEl = document.getElementById('modal-error');
+    const val = pn(document.getElementById('modal-balance').value);
+    if (isNaN(val) || val <= 0) {
+      errEl.textContent = 'Please enter your current in-game balance.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
   }
+  obGoto(step + 1);
+  setTimeout(() => {
+    const focusIds = ['ob-current-ship', 'ob-target-ship'];
+    const el = document.getElementById(focusIds[step]);
+    if (el) el.focus();
+  }, 50);
+}
+
+function obBack(step) { obGoto(step - 1); }
+
+function obSkip(step) { obGoto(step + 1); }
+
+function obUpdateSellPoint() {
+  const sale  = pn(document.getElementById('ob-current-sale').value);
+  const price = pn(document.getElementById('ob-target-price').value);
+  const field = document.getElementById('ob-sellpoint-field');
+  if (!isNaN(price) && price > 0) {
+    const sp = Math.max(0, price - (isNaN(sale) ? 0 : sale));
+    document.getElementById('ob-sell-point').value = Math.round(sp).toLocaleString();
+    field.style.display = 'block';
+  } else {
+    field.style.display = 'none';
+  }
+}
+
+function obFinish() {
+  const val         = pn(document.getElementById('modal-balance').value);
+  const currentShip = document.getElementById('ob-current-ship').value.trim();
+  const currentSale = pn(document.getElementById('ob-current-sale').value);
+  const targetShip  = document.getElementById('ob-target-ship').value.trim();
+  const targetPrice = pn(document.getElementById('ob-target-price').value);
+
   runs = [{
     id: Date.now(),
     run: 'Start',
@@ -624,6 +742,13 @@ function confirmStartBalance() {
     timestamp: new Date().toISOString()
   }];
   settings.startBalance = val;
+  if (currentShip)           settings.currentShip  = currentShip;
+  if (!isNaN(currentSale))   settings.currentSale  = currentSale;
+  if (targetShip)            settings.targetShip   = targetShip;
+  if (!isNaN(targetPrice) && targetPrice > 0) {
+    settings.targetPrice = targetPrice;
+    settings.sellPoint   = Math.max(0, targetPrice - (isNaN(currentSale) ? 0 : currentSale));
+  }
   save();
   document.getElementById('modal-backdrop').classList.add('hidden');
   loadSettingsToForm();
@@ -725,8 +850,9 @@ function render() {
     : 'Log more runs for a prediction';
 
   // Log hint
-  document.getElementById('log-hint').textContent =
-    `Gross = (New Balance \u2212 ${fmtf(latest.balance)}) + Fuel Cost`;
+  const logHint = document.getElementById('log-hint');
+  logHint.style.display = 'inline-flex';
+  logHint.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><text x="6" y="9" text-anchor="middle" font-size="8" font-family="sans-serif" fill="currentColor">i</text></svg> Gross = (New Balance \u2212 ${fmtf(latest.balance)}) + Fuel Cost`;
   document.getElementById('log-btn').textContent = `+ LOG RUN ${completed.length + 1}`;
 
   // History
@@ -1021,9 +1147,15 @@ function saveCell(idx, field, rawValue) {
 }
 
 function resetAll() {
-  if (!confirm('Reset all run data? Settings will be kept.')) return;
+  if (!confirm('Reset all run data? This will clear your history.')) return;
+  const clearSettings = confirm('Also reset ship settings (ship name, prices, cargo, etc.)?');
   runs = [];
+  if (clearSettings) {
+    settings = { ...DEFAULT_SETTINGS };
+    loadSettingsToForm();
+  }
   save();
+  render();
   showStartBalanceModal();
 }
 
