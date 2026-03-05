@@ -1,7 +1,6 @@
 # ⚓ Shipping Lanes Grind Tracker
 
 A self-contained, offline-capable grind tracker for **Roblox Shipping Lanes**.  
-No build step. No dependencies to install. Just open `index.html` — or host it for free on GitHub Pages.
 
 ## Features
 
@@ -14,16 +13,9 @@ No build step. No dependencies to install. Just open `index.html` — or host it
 - 🔗 **Share URL** — encodes your full data into a URL you can copy and send
 - 📈 **Live chart** showing actual balance vs projected trajectory
 
-## Quick Start (GitHub Pages)
-
-1. Fork or clone this repo
-2. Go to **Settings → Pages**
-3. Set source to `main` branch, `/ (root)`
-4. Your tracker will be live at `https://<your-username>.github.io/<repo-name>/`
-
 ## Local Use
 
-Just open `index.html` in any modern browser. No server needed.
+Just go to 'https://ogjakearroo.github.io/Shipping-Lanes-Calculator/' to get started
 
 ## Transferring Data Between Devices
 
