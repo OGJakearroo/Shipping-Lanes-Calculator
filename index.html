@@ -311,6 +311,11 @@
         <div class="field-hint">What your current ship sells for — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a> for values</div>
         <input type="text" id="ob-current-sale" placeholder="e.g. 28,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
       </div>
+      <div class="field">
+        <div class="field-label">Profit per NM ($/NM) &mdash; optional</div>
+        <div class="field-hint">Your ship's advertised earnings per nautical mile — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a></div>
+        <input type="text" id="ob-current-profit-nm" placeholder="e.g. 340,000" onblur="formatInput(this)">
+      </div>
       <div class="modal-nav">
         <button class="onboard-skip" onclick="obBack(1)">&larr; Back</button>
         <div style="display:flex;gap:8px;align-items:center">
@@ -333,6 +338,11 @@
         <div class="field-label">Target Ship Price ($)</div>
         <div class="field-hint">The purchase price of the ship you want — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a></div>
         <input type="text" id="ob-target-price" placeholder="e.g. 150,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
+      </div>
+      <div class="field">
+        <div class="field-label">Target Ship Profit/NM &mdash; optional</div>
+        <div class="field-hint">The target ship's earnings per nautical mile — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a></div>
+        <input type="text" id="ob-target-profit-nm" placeholder="e.g. 787,500" onblur="formatInput(this)">
       </div>
       <div class="field" id="ob-sellpoint-field" style="display:none">
         <div class="field-label">Sell Point</div>
@@ -429,6 +439,23 @@
           <div class="pred-label">TOTAL TO <span id="pred-target-ship-label">TARGET SHIP</span></div>
           <div style="color:var(--cyan);font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="pred-total">—</div>
         </div>
+      </div>
+
+      <div class="card" id="eff-card">
+        <div class="card-label">EFFICIENCY</div>
+        <div class="prediction-grid">
+          <div><div class="pred-label">AVG $/NM</div><div class="pred-val" style="color:var(--cyan)" id="eff-nm">—</div></div>
+          <div><div class="pred-label">AVG $/MIN</div><div class="pred-val" style="color:var(--green)" id="eff-min">—</div></div>
+          <div><div class="pred-label">TARGET SHIP $/NM</div><div class="pred-val" style="color:var(--orange)" id="eff-target-nm">—</div></div>
+          <div><div class="pred-label">UPGRADE BOOST</div><div class="pred-val" id="eff-gain">—</div></div>
+        </div>
+        <div id="eff-advertised-row" class="prediction-footer" style="display:none">
+          <div class="prediction-grid" style="margin-top:0">
+            <div><div class="pred-label">ADVERTISED $/NM</div><div class="pred-val" style="color:var(--muted)" id="eff-advertised-nm">—</div></div>
+            <div><div class="pred-label">VS ADVERTISED</div><div class="pred-val" id="eff-vs-advertised">—</div></div>
+          </div>
+        </div>
+        <div id="eff-hint" style="margin-top:10px;font-size:0.7rem;color:var(--muted);font-family:var(--mono);display:none"></div>
       </div>
 
       <div class="card">
@@ -708,7 +735,7 @@ function loadTheme() {
 // ── ONBOARDING MODAL ───────────────────────────────────────────────────────
 function showStartBalanceModal() {
   obGoto(0);
-  ['modal-balance','ob-current-ship','ob-current-sale','ob-target-ship','ob-target-price','ob-sell-point'].forEach(id => {
+  ['modal-balance','ob-current-ship','ob-current-sale','ob-current-profit-nm','ob-target-ship','ob-target-price','ob-target-profit-nm','ob-sell-point'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('ob-sellpoint-field').style.display = 'none';
@@ -765,11 +792,13 @@ function obUpdateSellPoint() {
 }
 
 function obFinish() {
-  const val         = pn(document.getElementById('modal-balance').value);
-  const currentShip = document.getElementById('ob-current-ship').value.trim();
-  const currentSale = pn(document.getElementById('ob-current-sale').value);
-  const targetShip  = document.getElementById('ob-target-ship').value.trim();
-  const targetPrice = pn(document.getElementById('ob-target-price').value);
+  const val              = pn(document.getElementById('modal-balance').value);
+  const currentShip      = document.getElementById('ob-current-ship').value.trim();
+  const currentSale      = pn(document.getElementById('ob-current-sale').value);
+  const currentProfitNM  = pn(document.getElementById('ob-current-profit-nm').value);
+  const targetShip       = document.getElementById('ob-target-ship').value.trim();
+  const targetPrice      = pn(document.getElementById('ob-target-price').value);
+  const targetProfitNM   = pn(document.getElementById('ob-target-profit-nm').value);
 
   runs = [{
     id: Date.now(),
@@ -782,9 +811,11 @@ function obFinish() {
     timestamp: new Date().toISOString()
   }];
   settings.startBalance = val;
-  if (currentShip)           settings.currentShip  = currentShip;
-  if (!isNaN(currentSale))   settings.currentSale  = currentSale;
-  if (targetShip)            settings.targetShip   = targetShip;
+  if (currentShip)                                   settings.currentShip     = currentShip;
+  if (!isNaN(currentSale))                           settings.currentSale     = currentSale;
+  if (!isNaN(currentProfitNM) && currentProfitNM > 0) settings.profitNM       = currentProfitNM;
+  if (targetShip)                                    settings.targetShip      = targetShip;
+  if (!isNaN(targetProfitNM)  && targetProfitNM  > 0) settings.targetProfitNM = targetProfitNM;
   if (!isNaN(targetPrice) && targetPrice > 0) {
     settings.targetPrice = targetPrice;
     settings.sellPoint   = Math.max(0, targetPrice - (isNaN(currentSale) ? 0 : currentSale));
@@ -867,6 +898,52 @@ function render() {
   const incomePerHour = incomePerMin * 60;
   document.getElementById('stat-income-min').textContent  = incomePerMin  > 0 ? fmtf(incomePerMin)  : '—';
   document.getElementById('stat-income-hour').textContent = incomePerHour > 0 ? fmts(incomePerHour) : '—';
+
+  // Efficiency
+  const nmRuns = completed.filter(r => r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0);
+  const avgProfitNM = nmRuns.length
+    ? nmRuns.reduce((a, r) => a + r.net / (r.odoEnd - r.odoStart), 0) / nmRuns.length
+    : 0;
+  const targetNM = settings.targetProfitNM;
+
+  document.getElementById('eff-nm').textContent  = avgProfitNM > 0 ? fmtf(avgProfitNM) + '/NM' : '—';
+  document.getElementById('eff-min').textContent = incomePerMin > 0 ? fmtf(incomePerMin) + '/min' : '—';
+  document.getElementById('eff-target-nm').textContent = targetNM > 0 ? fmtf(targetNM) + '/NM' : '—';
+
+  const advertisedNM  = settings.profitNM;
+  const advRow        = document.getElementById('eff-advertised-row');
+  if (advertisedNM > 0) {
+    advRow.style.display = 'block';
+    document.getElementById('eff-advertised-nm').textContent = fmtf(advertisedNM) + '/NM';
+    const vsAdvEl = document.getElementById('eff-vs-advertised');
+    if (avgProfitNM > 0) {
+      const vsAdv = (avgProfitNM - advertisedNM) / advertisedNM * 100;
+      vsAdvEl.textContent = (vsAdv >= 0 ? '+' : '') + vsAdv.toFixed(0) + '%';
+      vsAdvEl.style.color = vsAdv >= 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+      vsAdvEl.textContent = '—';
+      vsAdvEl.style.color = '';
+    }
+  } else {
+    advRow.style.display = 'none';
+  }
+
+  const gainEl   = document.getElementById('eff-gain');
+  const hintEl   = document.getElementById('eff-hint');
+  if (targetNM > 0 && avgProfitNM > 0) {
+    const gainPct = (targetNM - avgProfitNM) / avgProfitNM * 100;
+    gainEl.textContent  = (gainPct > 0 ? '+' : '') + gainPct.toFixed(0) + '%';
+    gainEl.style.color  = gainPct > 0 ? 'var(--green)' : 'var(--red)';
+    hintEl.style.display = 'block';
+    hintEl.textContent  = gainPct > 0
+      ? `Your target ship earns ${gainPct.toFixed(0)}% more per NM than your current average.`
+      : `Your current ship is already competitive with your target.`;
+  } else {
+    gainEl.textContent = '—';
+    gainEl.style.color = '';
+    hintEl.style.display = nmRuns.length === 0 ? 'block' : 'none';
+    hintEl.textContent = nmRuns.length === 0 ? 'Log odometer readings to see $/NM efficiency.' : '';
+  }
 
   // Prediction
   // "Trips after selling" = if you sold NOW, how many more trips to target price
