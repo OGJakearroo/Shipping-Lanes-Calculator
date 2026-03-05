@@ -26,9 +26,8 @@ A self-contained grind tracker for **Roblox Shipping Lanes**. No install, no acc
 ## Getting Started
 
 1. Open the [tracker](https://ogjakearroo.github.io/Shipping-Lanes-Calculator/)
-2. Enter your current in-game balance when prompted
-3. Go to **Settings** and configure your ship details
-4. After each run, go to **Log Run**, enter your new balance and fuel cost, and hit **Log Run**
+2. A 3-step setup guide walks you through entering your balance, current ship details, and target ship — with links to the [Ship List](https://roblox-shipping-lanes.fandom.com/wiki/Ship_List) where helpful
+3. After each run, go to **Log Run**, enter your new balance and fuel cost, and hit **Log Run**
 
 ---
 
@@ -61,10 +60,12 @@ A self-contained grind tracker for **Roblox Shipping Lanes**. No install, no acc
 
 ## Resetting
 
-The **Reset** button (top right) clears all run history. You'll also be asked whether to reset ship settings (name, prices, cargo, etc.) or keep them.
+The **Reset** button (top right) clears all run history and ship settings in one step, then relaunches the setup guide so you can start fresh.
 
 ---
 
 ## Resources
 
 - [Shipping Lanes Wiki](https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki)
+- [Ship List](https://roblox-shipping-lanes.fandom.com/wiki/Ship_List)
+- [Cargo](https://roblox-shipping-lanes.fandom.com/wiki/Cargo)

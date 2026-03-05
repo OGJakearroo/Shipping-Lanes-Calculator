@@ -298,7 +298,7 @@
     <!-- Step 2: Current ship -->
     <div class="onboard-pane" id="ob-pane-1">
       <div class="modal-title">Your Current Ship</div>
-      <div class="modal-subtitle">This helps calculate how much you'll earn from selling it when you upgrade. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="modal-subtitle">This helps calculate how much you'll earn from selling it when you upgrade. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
       <div class="field">
         <div class="field-label">Ship Name</div>
         <div class="field-hint">e.g. Handysize, Capesize, VLCC</div>
@@ -306,7 +306,7 @@
       </div>
       <div class="field">
         <div class="field-label">Resale Value ($)</div>
-        <div class="field-hint">What your current ship sells for — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">Ships wiki page</a> for values</div>
+        <div class="field-hint">What your current ship sells for — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a> for values</div>
         <input type="text" id="ob-current-sale" placeholder="e.g. 28,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
       </div>
       <div class="modal-nav">
@@ -321,7 +321,7 @@
     <!-- Step 3: Target ship -->
     <div class="onboard-pane" id="ob-pane-2">
       <div class="modal-title">Your Target Ship</div>
-      <div class="modal-subtitle">The ship you're grinding toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="modal-subtitle">The ship you're grinding toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
       <div class="field">
         <div class="field-label">Target Ship Name</div>
         <div class="field-hint">e.g. VLCC, Ore Carrier</div>
@@ -329,7 +329,7 @@
       </div>
       <div class="field">
         <div class="field-label">Target Ship Price ($)</div>
-        <div class="field-hint">The purchase price of the ship you want — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ships" target="_blank">Ships wiki page</a></div>
+        <div class="field-hint">The purchase price of the ship you want — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a></div>
         <input type="text" id="ob-target-price" placeholder="e.g. 150,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
       </div>
       <div class="field" id="ob-sellpoint-field" style="display:none">
@@ -509,7 +509,7 @@
   <!-- SETTINGS -->
   <div class="tab-pane" id="tab-settings">
     <div class="card settings-section">
-      <div class="settings-title">Current Ship</div>
+      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Current Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List &rarr;</a></div>
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Ship Name</div>
@@ -518,7 +518,7 @@
         </div>
         <div class="field">
           <div class="field-label">Resale Value ($)</div>
-          <div class="field-hint">What you'll get when you sell it (typically 30% of purchase price)</div>
+          <div class="field-hint">What you'll get when you sell it — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a> for values</div>
           <input type="text" id="set-current-sale" placeholder="e.g. 13,800,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
@@ -537,7 +537,7 @@
     </div>
 
     <div class="card settings-section">
-      <div class="settings-title">Target Ship</div>
+      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Target Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List &rarr;</a></div>
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Target Ship Name</div>
@@ -546,7 +546,7 @@
         </div>
         <div class="field">
           <div class="field-label">Target Ship Price ($)</div>
-          <div class="field-hint">Full purchase price of the target ship</div>
+          <div class="field-hint">Full purchase price — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a> for prices</div>
           <input type="text" id="set-target-price" placeholder="e.g. 245,000,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
@@ -556,7 +556,7 @@
         </div>
         <div class="field">
           <div class="field-label">Cargo Type</div>
-          <div class="field-hint">Type of cargo this ship carries</div>
+          <div class="field-hint">Type of cargo this ship carries — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Cargo" target="_blank">Cargo wiki page</a></div>
           <input type="text" id="set-cargo" placeholder="e.g. Bulk, Ore, Gas, Containers" oninput="saveSettings()">
         </div>
       </div>
@@ -673,9 +673,12 @@ function loadTheme() {
 // ── ONBOARDING MODAL ───────────────────────────────────────────────────────
 function showStartBalanceModal() {
   obGoto(0);
-  document.getElementById('modal-backdrop').classList.remove('hidden');
-  document.getElementById('modal-balance').value = '';
+  ['modal-balance','ob-current-ship','ob-current-sale','ob-target-ship','ob-target-price','ob-sell-point'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('ob-sellpoint-field').style.display = 'none';
   document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('modal-backdrop').classList.remove('hidden');
   setTimeout(() => document.getElementById('modal-balance').focus(), 100);
 }
 
@@ -709,7 +712,9 @@ function obNext(step) {
 
 function obBack(step) { obGoto(step - 1); }
 
-function obSkip(step) { obGoto(step + 1); }
+function obSkip(step) {
+  if (step >= 2) { obFinish(); } else { obGoto(step + 1); }
+}
 
 function obUpdateSellPoint() {
   const sale  = pn(document.getElementById('ob-current-sale').value);
