@@ -68,4 +68,4 @@ The **Reset** button (top right) clears all run history and ship settings in one
 
 - [Shipping Lanes Wiki](https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki)
 - [Ship List](https://roblox-shipping-lanes.fandom.com/wiki/Ship_List)
-- [Cargo](https://roblox-shipping-lanes.fandom.com/wiki/Cargo)
+- [Cargo](https://roblox-shipping-lanes.fandom.com/wiki/Cargo_Types)
