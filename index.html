@@ -669,8 +669,8 @@
     <div class="card">
       <div class="card-label">SHARE SNAPSHOT</div>
       <div class="field-hint" style="margin-bottom:10px">Copy a shareable URL with your current data encoded. Anyone with the link can view your progress.</div>
-      <button class="btn btn-muted" style="width:100%" onclick="copyShareURL()">&#128279; Copy Share URL</button>
-      <div style="color:var(--green);font-size:0.72rem;margin-top:8px;display:none" id="share-copied">URL copied to clipboard!</div>
+      <button class="btn btn-muted" style="width:100%" id="share-btn" onclick="copyShareURL()">&#128279; Copy Share URL</button>
+      <div style="font-size:0.72rem;margin-top:8px;display:none" id="share-copied"></div>
     </div>
   </div>
 </div>
@@ -1454,24 +1454,79 @@ function importJSON() {
 }
 
 function copyShareURL() {
-  const data = btoa(encodeURIComponent(JSON.stringify({ runs, settings })));
-  const url  = location.href.split('?')[0] + '?data=' + data;
-  navigator.clipboard.writeText(url).then(() => {
-    const el = document.getElementById('share-copied');
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 2000);
-  });
+  const s = {
+    b: settings.startBalance, cs: settings.currentShip, cr: settings.currentSale,
+    sp: settings.sellPoint,   pn: settings.profitNM,    ts: settings.targetShip,
+    tp: settings.targetPrice, tn: settings.targetProfitNM, cg: settings.cargo
+  };
+  // Compact run arrays: [balance, fuel, odoStart||0, odoEnd||0, duration||0]
+  let r = runs.map(run => [run.balance, run.fuel||0, run.odoStart||0, run.odoEnd||0, run.duration||0]);
+  const prefix = location.href.split('?')[0] + '?data=';
+  // Trim oldest logged runs (keep r[0] = initial balance) until URL fits ≤2000 chars
+  while (r.length > 1) {
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, s, r }))));
+    if ((prefix + encoded).length <= 2000) break;
+    r = [r[0], ...r.slice(2)];
+  }
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, s, r }))));
+  const longUrl = prefix + encoded;
+  const btn = document.getElementById('share-btn');
+  const el  = document.getElementById('share-copied');
+
+  btn.disabled = true;
+  btn.textContent = 'Shortening…';
+
+  fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl))
+    .then(res => res.ok ? res.text() : Promise.reject())
+    .then(short => navigator.clipboard.writeText(short.trim()).then(() => {
+      el.style.color = 'var(--green)';
+      el.textContent = 'Short URL copied! ' + short.trim();
+    }))
+    .catch(() => navigator.clipboard.writeText(longUrl).then(() => {
+      el.style.color = 'var(--muted)';
+      el.textContent = 'Copied full URL (shortener unavailable)';
+    }))
+    .finally(() => {
+      el.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '🔗 Copy Share URL';
+      setTimeout(() => el.style.display = 'none', 4000);
+    });
 }
 
 function loadFromURL() {
   const p = new URLSearchParams(location.search);
-  if (p.has('data')) {
+  if (!p.has('data')) return;
+  try {
+    let data;
     try {
-      const data = JSON.parse(decodeURIComponent(atob(p.get('data'))));
+      data = JSON.parse(decodeURIComponent(escape(atob(p.get('data')))));
+    } catch {
+      // Fall back to old URL format
+      data = JSON.parse(decodeURIComponent(atob(p.get('data'))));
+    }
+    if (data.v === 2) {
+      const s = data.s || {};
+      settings = { ...DEFAULT_SETTINGS,
+        startBalance: s.b||0, currentShip: s.cs||'', currentSale: s.cr||0,
+        sellPoint: s.sp||0,   profitNM: s.pn||0,     targetShip: s.ts||'',
+        targetPrice: s.tp||0, targetProfitNM: s.tn||0, cargo: s.cg||''
+      };
+      runs = (data.r || []).map((a, i) => ({
+        balance: a[0], fuel: a[1]||0,
+        odoStart: a[2]||null, odoEnd: a[3]||null, duration: a[4]||null,
+        run: i === 0 ? 'Start' : `Run ${i}`, gross: 0, net: 0
+      }));
+      runs.forEach((r, i) => {
+        if (i === 0) return;
+        r.net = r.balance - runs[i-1].balance;
+        r.gross = r.net + r.fuel;
+      });
+    } else {
       if (data.runs) runs = data.runs;
       if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
-    } catch {}
-  }
+    }
+  } catch {}
 }
 
 // ── TABS ───────────────────────────────────────────────────────────────────
