@@ -407,6 +407,14 @@
           <div class="card-label">Est. Time Remaining</div>
           <div class="stat-val" style="color:var(--purple)" id="stat-time">~0 hrs</div>
         </div>
+        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
+          <div class="card-label">Avg Income / Min</div>
+          <div class="stat-val" style="color:var(--green)" id="stat-income-min">—</div>
+        </div>
+        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
+          <div class="card-label">Avg Income / Hour</div>
+          <div class="stat-val" style="color:var(--green)" id="stat-income-hour">—</div>
+        </div>
       </div>
 
       <div class="card">
@@ -855,6 +863,10 @@ function render() {
   document.getElementById('stat-needed').textContent  = sellPoint > 0 ? fmt(stillToSell) : '—';
   document.getElementById('stat-trips').textContent   = avgNet > 0 ? `~${tripsToSell} trips` : '—';
   document.getElementById('stat-time').textContent    = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
+  const incomePerMin  = timed.length > 0 ? avgNet / avgDur : 0;
+  const incomePerHour = incomePerMin * 60;
+  document.getElementById('stat-income-min').textContent  = incomePerMin  > 0 ? fmtf(incomePerMin)  : '—';
+  document.getElementById('stat-income-hour').textContent = incomePerHour > 0 ? fmts(incomePerHour) : '—';
 
   // Prediction
   // "Trips after selling" = if you sold NOW, how many more trips to target price
