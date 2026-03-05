@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping Lanes Grind Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060d18;
+    --bg2: #07111e;
+    --bg3: #040b14;
+    --border: #0e2035;
+    --border2: #1a3a5c;
+    --cyan: #4fc3f7;
+    --cyan-dim: #4fc3f744;
+    --blue: #0288d1;
+    --green: #66bb6a;
+    --orange: #ffa726;
+    --red: #ef5350;
+    --purple: #ab47bc;
+    --muted: #2a4a5e;
+    --text: #8fb8d0;
+    --mono: 'Share Tech Mono', 'Courier New', monospace;
+    --head: 'Rajdhani', sans-serif;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(180deg, #0a1628 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 18px;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .title { font-family: var(--head); font-size: 1.7rem; font-weight: 700; color: var(--cyan); letter-spacing: 0.15em; text-transform: uppercase; }
+  .subtitle { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.3em; margin-top: 3px; }
+  .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .save-badge { font-size: 0.6rem; color: var(--green); letter-spacing: 0.1em; opacity: 0; transition: opacity 0.3s; }
+  .save-badge.show { opacity: 1; }
+
+  .progress-wrap { margin-top: 16px; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--muted); margin-bottom: 5px; }
+  .progress-labels .pct { color: var(--cyan); }
+  .progress-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #01579b, var(--cyan)); border-radius: 3px; box-shadow: 0 0 10px #4fc3f766; transition: width 0.6s ease; }
+
+  /* ── BODY ── */
+  .body { padding: 20px 24px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 6px 14px; font-size: 0.62rem; letter-spacing: 0.15em; cursor: pointer;
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 3px; font-family: var(--mono); transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--border); color: var(--cyan); border-color: var(--border2); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── CARDS ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+  .card-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-val { font-size: 1.1rem; font-weight: bold; font-family: var(--mono); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── INPUTS ── */
+  .field { margin-bottom: 14px; }
+  .field-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 3px; }
+  .field-hint { font-size: 0.58rem; color: #1a3a5e; margin-bottom: 6px; }
+  input[type=text], input[type=number], input[type=time], select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 3px; padding: 8px 11px; color: var(--cyan); font-size: 0.82rem;
+    font-family: var(--mono); outline: none; color-scheme: dark;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: var(--border2); }
+  .grid-2-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .duration-hint { margin-top: 7px; font-size: 0.73rem; color: var(--purple); }
+  .duration-hint span { color: var(--muted); font-size: 0.62rem; }
+
+  /* ── BUTTONS ── */
+  .btn { border: none; border-radius: 3px; padding: 8px 16px; font-family: var(--mono); font-size: 0.72rem; cursor: pointer; letter-spacing: 0.1em; font-weight: bold; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-danger  { background: #1a0a0a; border: 1px solid #3a1010; color: var(--red); }
+  .btn-muted   { background: var(--border); color: var(--text); }
+  .btn-green   { background: #1a3a1a; border: 1px solid #1a4a1a; color: var(--green); }
+  .btn-full    { width: 100%; padding: 11px; margin-top: 16px; }
+
+  /* ── PREVIEW ── */
+  .preview { margin-top: 14px; padding: 11px; background: var(--bg3); border-radius: 4px; border: 1px solid var(--border); }
+  .preview-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.15em; margin-bottom: 7px; }
+  .preview-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 0.78rem; }
+
+  /* ── PREDICTION ── */
+  .prediction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+  .pred-label { color: var(--muted); font-size: 0.62rem; margin-bottom: 3px; }
+  .pred-val { font-size: 0.95rem; font-weight: bold; }
+  .prediction-footer { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--border); }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.73rem; }
+  thead tr { font-size: 0.56rem; letter-spacing: 0.15em; }
+  th { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: normal; }
+  th.left, td.left { text-align: left; }
+  th.right, td.right { text-align: right; }
+  td { padding: 7px 8px; border-bottom: 1px solid #07111e; }
+  .totals-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 0.7rem; }
+
+  /* ── CHART ── */
+  #chart-container { width: 100%; height: 220px; }
+
+  /* ── ERROR ── */
+  .error { color: var(--red); font-size: 0.73rem; margin-top: 8px; }
+
+  /* ── SETTINGS ── */
+  .settings-section { margin-bottom: 20px; }
+  .settings-title { font-family: var(--head); font-size: 1rem; color: var(--cyan); margin-bottom: 12px; letter-spacing: 0.1em; }
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── EXPORT ── */
+  .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .export-desc { font-size: 0.62rem; color: var(--muted); margin-top: 4px; }
+
+  @media (max-width: 480px) {
+    .grid-2, .grid-4, .settings-grid, .export-grid, .grid-2-input, .preview-grid, .totals-row { grid-template-columns: 1fr; }
+    .header-top { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="title">⚓ <span id="hdr-current-ship">Capesize</span> → <span id="hdr-target-ship">Seamax Ore Carrier</span></div>
+      <div class="subtitle" id="hdr-subtitle">ROBLOX SHIPPING LANES · GRIND TRACKER</div>
+    </div>
+    <div class="header-actions">
+      <span class="save-badge" id="save-badge">● SAVED</span>
+      <button class="btn btn-danger" onclick="resetAll()" style="font-size:0.58rem;padding:5px 10px;">RESET</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span id="prog-current">$0M current</span>
+      <span class="pct" id="prog-pct">0%</span>
+      <span id="prog-target">$231.2M sell point</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
+    <button class="tab-btn" onclick="switchTab('log')">LOG RUN</button>
+    <button class="tab-btn" onclick="switchTab('history')">HISTORY</button>
+    <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
+    <button class="tab-btn" onclick="switchTab('export')">EXPORT / IMPORT</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="tab-pane active" id="tab-dashboard">
+    <div class="grid-2">
+      <div class="card" style="border-color:#4fc3f722;margin-bottom:0">
+        <div class="card-label">Current Balance</div>
+        <div class="stat-val" style="color:var(--cyan)" id="stat-balance">$0</div>
+      </div>
+      <div class="card" style="border-color:#ffa72622;margin-bottom:0">
+        <div class="card-label">Still Needed (sell point)</div>
+        <div class="stat-val" style="color:var(--orange)" id="stat-needed">$0</div>
+      </div>
+      <div class="card" style="border-color:#ef535022;margin-bottom:0">
+        <div class="card-label">Trips to Sell Point</div>
+        <div class="stat-val" style="color:var(--red)" id="stat-trips">~0 trips</div>
+      </div>
+      <div class="card" style="border-color:#ab47bc22;margin-bottom:0">
+        <div class="card-label">Est. Time Remaining</div>
+        <div class="stat-val" style="color:var(--purple)" id="stat-time">~0 hrs</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label" id="pred-label">SMART PREDICTION</div>
+      <div class="prediction-grid">
+        <div><div class="pred-label">AVG NET / TRIP</div><div class="pred-val" style="color:var(--green)" id="pred-avg-net">—</div></div>
+        <div><div class="pred-label">AVG TRIP DURATION</div><div class="pred-val" style="color:var(--green)" id="pred-avg-dur">—</div></div>
+        <div><div class="pred-label">SELL <span id="pred-current-ship">CURRENT SHIP</span> FOR</div><div class="pred-val" style="color:var(--orange)" id="pred-sale-val">—</div></div>
+        <div><div class="pred-label">TRIPS AFTER SELLING</div><div class="pred-val" style="color:var(--cyan)" id="pred-after-trips">—</div></div>
+      </div>
+      <div class="prediction-footer">
+        <div class="pred-label">PROJECTED <span id="pred-target-ship-label">TARGET SHIP</span> DATE</div>
+        <div style="color:var(--cyan);font-size:0.88rem;margin-top:3px" id="pred-date">—</div>
+        <div style="color:var(--muted);font-size:0.6rem;margin-top:3px" id="pred-total">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">BALANCE PROGRESSION + PROJECTION</div>
+      <div id="chart-container"></div>
+    </div>
+  </div>
+
+  <!-- LOG RUN -->
+  <div class="tab-pane" id="tab-log">
+    <div class="card">
+      <div class="card-label">LOG NEW RUN</div>
+      <div class="field-hint" id="log-hint" style="margin-bottom:16px"></div>
+
+      <div class="field">
+        <div class="field-label">New Balance ($)</div>
+        <div class="field-hint">Your total balance after unloading cargo</div>
+        <input type="text" id="inp-balance" placeholder="e.g. 63000000" oninput="updatePreview()" onkeydown="if(event.key==='Enter')logRun()">
+      </div>
+      <div class="field">
+        <div class="field-label">Fuel Cost ($)</div>
+        <div class="field-hint">Amount spent refuelling this trip</div>
+        <input type="text" id="inp-fuel" placeholder="e.g. 370000" oninput="updatePreview()" onkeydown="if(event.key==='Enter')logRun()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">Trip Times — optional</div>
+        <div class="field-hint">Duration auto-calculated from start → end time</div>
+        <div class="grid-2-input">
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">START TIME</div>
+            <input type="time" id="inp-start" oninput="updateDurPreview()">
+          </div>
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">END TIME</div>
+            <input type="time" id="inp-end" oninput="updateDurPreview()">
+          </div>
+        </div>
+        <div class="duration-hint" id="dur-preview" style="display:none"></div>
+      </div>
+
+      <div class="preview" id="run-preview" style="display:none">
+        <div class="preview-label">PREVIEW</div>
+        <div class="preview-grid">
+          <div><span style="color:var(--muted)">Gross: </span><span id="prev-gross"></span></div>
+          <div><span style="color:var(--muted)">Fuel: </span><span style="color:var(--red)" id="prev-fuel"></span></div>
+          <div><span style="color:var(--muted)">Net: </span><span id="prev-net"></span></div>
+        </div>
+      </div>
+
+      <div class="error" id="log-error" style="display:none"></div>
+      <button class="btn btn-primary btn-full" id="log-btn" onclick="logRun()">+ LOG RUN</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="tab-pane" id="tab-history">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="card-label" id="hist-label">RUN HISTORY</div>
+        <button class="btn btn-danger" style="font-size:0.58rem;padding:4px 10px" onclick="undoLast()">UNDO LAST</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="left">RUN</th>
+              <th class="right">BALANCE</th>
+              <th class="right">FUEL</th>
+              <th class="right">GROSS</th>
+              <th class="right">NET</th>
+              <th class="right">DURATION</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+      <div class="totals-row" id="totals-row" style="display:none">
+        <div><span style="color:var(--muted)">Total earned: </span><span style="color:var(--green)" id="tot-earned"></span></div>
+        <div><span style="color:var(--muted)">Total fuel: </span><span style="color:var(--red)" id="tot-fuel"></span></div>
+        <div><span style="color:var(--muted)">Time logged: </span><span style="color:var(--purple)" id="tot-time"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-pane" id="tab-settings">
+    <div class="card settings-section">
+      <div class="settings-title">🚢 Current Ship</div>
+      <div class="settings-grid">
+        <div class="field">
+          <div class="field-label">Ship Name</div>
+          <input type="text" id="set-current-ship" placeholder="e.g. Capesize" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Resale Value ($)</div>
+          <div class="field-hint">What you'll get when you sell (30% of purchase)</div>
+          <input type="text" id="set-current-sale" placeholder="e.g. 13800000" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Sell-Point Balance ($)</div>
+          <div class="field-hint">Balance at which to sell your current ship</div>
+          <input type="text" id="set-sell-point" placeholder="e.g. 231200000" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Profit per NM ($/NM)</div>
+          <div class="field-hint">Your current ship's earnings rate</div>
+          <input type="text" id="set-profit-nm" placeholder="e.g. 340000" oninput="saveSettings()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card settings-section">
+      <div class="settings-title">🎯 Target Ship</div>
+      <div class="settings-grid">
+        <div class="field">
+          <div class="field-label">Target Ship Name</div>
+          <input type="text" id="set-target-ship" placeholder="e.g. Seamax Ore Carrier" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Target Ship Price ($)</div>
+          <input type="text" id="set-target-price" placeholder="e.g. 245000000" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Target Ship Profit/NM</div>
+          <div class="field-hint">For comparison once you upgrade</div>
+          <input type="text" id="set-target-profit-nm" placeholder="e.g. 787500" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Cargo Type</div>
+          <input type="text" id="set-cargo" placeholder="e.g. Bulk, Ore, Gas, Containers" oninput="saveSettings()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card settings-section">
+      <div class="settings-title">🛣️ Route Info</div>
+      <div class="settings-grid">
+        <div class="field">
+          <div class="field-label">Route Name</div>
+          <input type="text" id="set-route" placeholder="e.g. Rockfall ↔ Wilmington Cove" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Route Distance (NM paid)</div>
+          <div class="field-hint">Straight-line distance you get paid for</div>
+          <input type="text" id="set-distance" placeholder="e.g. 26.1" oninput="saveSettings()">
+        </div>
+        <div class="field">
+          <div class="field-label">Starting Balance ($)</div>
+          <div class="field-hint">Used as baseline if resetting run data</div>
+          <input type="text" id="set-start-balance" placeholder="e.g. 55301835" oninput="saveSettings()">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="applySettings()">✓ APPLY SETTINGS</button>
+      <button class="btn btn-muted" onclick="loadSettingsToForm()">↺ REVERT</button>
+    </div>
+    <div style="color:var(--green);font-size:0.65rem;margin-top:8px;display:none" id="settings-saved">Settings applied!</div>
+  </div>
+
+  <!-- EXPORT / IMPORT -->
+  <div class="tab-pane" id="tab-export">
+    <div class="card">
+      <div class="card-label">EXPORT DATA</div>
+      <div class="export-grid">
+        <div>
+          <button class="btn btn-green" style="width:100%" onclick="exportJSON()">⬇ Export JSON</button>
+          <div class="export-desc">Full backup — runs + settings. Re-importable.</div>
+        </div>
+        <div>
+          <button class="btn btn-green" style="width:100%" onclick="exportCSV()">⬇ Export CSV</button>
+          <div class="export-desc">Run history as spreadsheet-compatible CSV.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">IMPORT DATA</div>
+      <div class="field-hint" style="margin-bottom:10px">Paste a previously exported JSON backup below to restore your data.</div>
+      <textarea id="import-area" placeholder='Paste JSON here...' style="width:100%;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px;color:var(--cyan);font-family:var(--mono);font-size:0.72rem;outline:none;resize:vertical;color-scheme:dark"></textarea>
+      <div class="error" id="import-error" style="display:none"></div>
+      <button class="btn btn-primary btn-full" onclick="importJSON()" style="margin-top:10px">⬆ IMPORT & RESTORE</button>
+    </div>
+
+    <div class="card">
+      <div class="card-label">SHARE SNAPSHOT</div>
+      <div class="field-hint" style="margin-bottom:10px">Copy a shareable URL with your current data encoded. Anyone with the link can view your progress.</div>
+      <button class="btn btn-muted" style="width:100%" onclick="copyShareURL()">🔗 Copy Share URL</button>
+      <div style="color:var(--green);font-size:0.65rem;margin-top:8px;display:none" id="share-copied">URL copied to clipboard!</div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart via plain canvas since CDN recharts needs React -->
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'shipping-grind-v2';
+const SETTINGS_KEY = 'shipping-grind-settings-v2';
+
+const DEFAULT_SETTINGS = {
+  currentShip: 'Capesize',
+  currentSale: 13800000,
+  sellPoint: 231200000,
+  profitNM: 340000,
+  targetShip: 'Seamax Ore Carrier',
+  targetPrice: 245000000,
+  targetProfitNM: 787500,
+  cargo: 'Bulk',
+  route: 'Rockfall ↔ Wilmington Cove',
+  distance: 26.1,
+  startBalance: 55301835,
+};
+
+const INITIAL_RUNS = [
+  { id:1, run:'Start',  balance:17000000,  fuel:0,       gross:0,        net:0,        duration:null, timestamp:'2025-03-01T00:00:00' },
+  { id:2, run:'Run 1',  balance:26000000,  fuel:370000,  gross:8800000,  net:8430000,  duration:null, timestamp:'2025-03-01T01:00:00' },
+  { id:3, run:'Run 2',  balance:47260945,  fuel:390836,  gross:8961641,  net:8570805,  duration:47,   timestamp:'2025-03-01T02:00:00' },
+  { id:4, run:'Run 3',  balance:55301835,  fuel:370000,  gross:8411690,  net:8041690,  duration:41,   timestamp:'2025-03-01T03:00:00' },
+];
+
+let runs = [];
+let settings = { ...DEFAULT_SETTINGS };
+
+function load() {
+  try {
+    const sr = localStorage.getItem(STORAGE_KEY);
+    runs = sr ? JSON.parse(sr) : JSON.parse(JSON.stringify(INITIAL_RUNS));
+  } catch { runs = JSON.parse(JSON.stringify(INITIAL_RUNS)); }
+  try {
+    const ss = localStorage.getItem(SETTINGS_KEY);
+    if (ss) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(ss) };
+  } catch {}
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    const b = document.getElementById('save-badge');
+    b.classList.add('show');
+    setTimeout(() => b.classList.remove('show'), 1500);
+  } catch {}
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+const pn = s => parseFloat(String(s).replace(/,/g,''));
+const fmt  = v => `$${(v/1e6).toFixed(2)}M`;
+const fmts = v => `$${(v/1e6).toFixed(1)}M`;
+const fmtf = v => `$${Math.round(v).toLocaleString()}`;
+
+function calcDuration(s, e) {
+  if (!s || !e) return null;
+  const [sh,sm] = s.split(':').map(Number);
+  const [eh,em] = e.split(':').map(Number);
+  let m = (eh*60+em)-(sh*60+sm);
+  if (m < 0) m += 1440;
+  return m > 0 ? m : null;
+}
+
+function stats() {
+  const completed = runs.slice(1);
+  const avgNet = completed.length
+    ? completed.reduce((a,r)=>a+r.net,0)/completed.length
+    : 8400000;
+  const timed = completed.filter(r=>r.duration);
+  const avgDur = timed.length
+    ? timed.reduce((a,r)=>a+r.duration,0)/timed.length
+    : 41;
+  return { completed, avgNet, timed, avgDur };
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function render() {
+  const latest = runs[runs.length-1];
+  const { completed, avgNet, timed, avgDur } = stats();
+  const { sellPoint, currentSale, targetPrice, currentShip, targetShip } = settings;
+
+  // Header
+  document.getElementById('hdr-current-ship').textContent = currentShip;
+  document.getElementById('hdr-target-ship').textContent  = targetShip;
+
+  // Progress bar
+  const pct = Math.min(100,(latest.balance/sellPoint)*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('prog-current').textContent = fmt(latest.balance)+' current';
+  document.getElementById('prog-pct').textContent = pct.toFixed(1)+'%';
+  document.getElementById('prog-target').textContent = fmt(sellPoint)+' sell point';
+
+  // Stats
+  const stillToSell = Math.max(0, sellPoint - latest.balance);
+  const tripsToSell = Math.ceil(stillToSell / avgNet);
+  const minsToSell  = tripsToSell * avgDur;
+
+  document.getElementById('stat-balance').textContent = fmt(latest.balance);
+  document.getElementById('stat-needed').textContent  = fmt(stillToSell);
+  document.getElementById('stat-trips').textContent   = `~${tripsToSell} trips`;
+  document.getElementById('stat-time').textContent    = `~${(minsToSell/60).toFixed(1)} hrs`;
+
+  // Prediction
+  const afterSale     = latest.balance + currentSale;
+  const stillAfter    = Math.max(0, targetPrice - afterSale);
+  const tripsAfter    = Math.max(0, Math.ceil(stillAfter / avgNet));
+  const projFinish    = new Date(Date.now() + minsToSell*60000);
+  const durLabel      = timed.length < 2 ? ' (limited data)' : '';
+
+  document.getElementById('pred-label').textContent = `SMART PREDICTION · ${completed.length} runs, avg ${avgDur.toFixed(0)} min/trip`;
+  document.getElementById('pred-avg-net').textContent  = fmts(avgNet);
+  document.getElementById('pred-avg-dur').textContent  = `${avgDur.toFixed(0)} min${durLabel}`;
+  document.getElementById('pred-current-ship').textContent = currentShip.toUpperCase();
+  document.getElementById('pred-sale-val').textContent = fmt(currentSale);
+  document.getElementById('pred-after-trips').textContent = `~${tripsAfter} more trips`;
+  document.getElementById('pred-target-ship-label').textContent = targetShip.toUpperCase();
+  document.getElementById('pred-date').textContent =
+    projFinish.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'short'}) +
+    ' · ~' + projFinish.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('pred-total').textContent =
+    `Total ~${tripsToSell+tripsAfter} trips · ~${((tripsToSell+tripsAfter)*avgDur/60).toFixed(1)} hours of grinding`;
+
+  // Log hint
+  document.getElementById('log-hint').textContent =
+    `Gross = (New Balance − ${fmtf(latest.balance)}) + Fuel Cost`;
+  document.getElementById('log-btn').textContent = `+ LOG RUN ${completed.length+1}`;
+
+  // History
+  const tbody = document.getElementById('history-tbody');
+  tbody.innerHTML = runs.map(r=>`
+    <tr>
+      <td class="left" style="color:var(--cyan)">${r.run}</td>
+      <td class="right">${fmt(r.balance)}</td>
+      <td class="right" style="color:var(--red)">${r.fuel ? '-'+fmt(r.fuel) : '—'}</td>
+      <td class="right">${r.gross ? fmt(r.gross) : '—'}</td>
+      <td class="right" style="color:${r.net>0?'var(--green)':'var(--red)'}">${r.net ? (r.net>0?'+':'')+fmt(r.net) : '—'}</td>
+      <td class="right" style="color:var(--purple)">${r.duration ? r.duration+'m' : '—'}</td>
+    </tr>`).join('');
+
+  document.getElementById('hist-label').textContent = `RUN HISTORY · ${completed.length} runs logged`;
+  if (completed.length > 0) {
+    document.getElementById('totals-row').style.display = 'grid';
+    document.getElementById('tot-earned').textContent = fmt(latest.balance - runs[0].balance);
+    document.getElementById('tot-fuel').textContent   = '-'+fmt(completed.reduce((a,r)=>a+r.fuel,0));
+    document.getElementById('tot-time').textContent   = timed.reduce((a,r)=>a+r.duration,0)+'m';
+  }
+
+  drawChart(tripsToSell, avgNet, sellPoint, targetPrice);
+}
+
+// ── CHART (canvas) ─────────────────────────────────────────────────────────
+function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
+  const container = document.getElementById('chart-container');
+  let canvas = container.querySelector('canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    container.appendChild(canvas);
+  }
+  canvas.width  = container.clientWidth  || 600;
+  canvas.height = container.clientHeight || 220;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // Build data points
+  const actual = runs.map((r,i)=>({ x:i, y:r.balance, label:r.run }));
+  const proj   = [];
+  let pb = runs[runs.length-1].balance;
+  const MAX_PROJ = Math.min(tripsToSell+3, 25);
+  for (let i=1; i<=MAX_PROJ; i++) {
+    pb = Math.min(pb+avgNet, targetPrice);
+    proj.push({ x:runs.length-1+i, y:pb });
+  }
+
+  const allY  = [...actual, ...proj].map(p=>p.y);
+  const minY  = 0;
+  const maxY  = Math.max(...allY, targetPrice) * 1.05;
+  const totalX = actual.length + proj.length - 1;
+
+  const PAD = { l:58, r:16, t:14, b:28 };
+  const gW = W-PAD.l-PAD.r;
+  const gH = H-PAD.t-PAD.b;
+
+  const xOf = x => PAD.l + (x/totalX)*gW;
+  const yOf = y => PAD.t + gH - ((y-minY)/(maxY-minY))*gH;
+
+  // Grid
+  ctx.strokeStyle='#0a1a28'; ctx.lineWidth=1;
+  for (let i=0;i<=4;i++) {
+    const y = PAD.t + (i/4)*gH;
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
+    const val = maxY - (i/4)*(maxY-minY);
+    ctx.fillStyle='#2a4a5e'; ctx.font='9px Share Tech Mono,monospace';
+    ctx.textAlign='right';
+    ctx.fillText('$'+(val/1e6).toFixed(0)+'M', PAD.l-4, y+3);
+  }
+
+  // Reference lines
+  const drawRef = (val, color, label) => {
+    const y = yOf(val);
+    if (y < PAD.t || y > PAD.t+gH) return;
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
+    ctx.fillStyle=color; ctx.font='9px Share Tech Mono,monospace'; ctx.textAlign='left';
+    ctx.fillText(label, PAD.l+3, y-3);
+    ctx.restore();
+  };
+  drawRef(sellPoint,  '#ffa726', 'SELL');
+  drawRef(targetPrice,'#66bb6a', 'TARGET');
+
+  // Projected line
+  const projPts = [actual[actual.length-1], ...proj];
+  ctx.save();
+  ctx.strokeStyle='#4fc3f744'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath();
+  projPts.forEach((p,i) => {
+    const x = xOf(actual.length-1+i);
+    const y = yOf(p.y);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke(); ctx.restore();
+
+  // Actual line
+  ctx.save();
+  ctx.strokeStyle='#4fc3f7'; ctx.lineWidth=2; ctx.setLineDash([]);
+  ctx.beginPath();
+  actual.forEach((p,i) => {
+    i===0 ? ctx.moveTo(xOf(p.x),yOf(p.y)) : ctx.lineTo(xOf(p.x),yOf(p.y));
+  });
+  ctx.stroke();
+  actual.forEach(p => {
+    ctx.beginPath(); ctx.arc(xOf(p.x),yOf(p.y),3,0,Math.PI*2);
+    ctx.fillStyle='#4fc3f7'; ctx.fill();
+  });
+  ctx.restore();
+
+  // X labels
+  ctx.fillStyle='#2a4a5e'; ctx.font='8px Share Tech Mono,monospace'; ctx.textAlign='center';
+  actual.forEach(p => ctx.fillText(p.label.replace('Run ','R'), xOf(p.x), H-PAD.b+12));
+}
+
+// ── LOG RUN ────────────────────────────────────────────────────────────────
+function updatePreview() {
+  const b = pn(document.getElementById('inp-balance').value);
+  const f = pn(document.getElementById('inp-fuel').value);
+  const prev = document.getElementById('run-preview');
+  if (isNaN(b)||isNaN(f)) { prev.style.display='none'; return; }
+  const latest = runs[runs.length-1];
+  const net = b - latest.balance;
+  const gross = net + f;
+  prev.style.display='block';
+  document.getElementById('prev-gross').textContent = fmt(gross);
+  document.getElementById('prev-gross').style.color = gross>0?'var(--text)':'var(--red)';
+  document.getElementById('prev-fuel').textContent  = '-'+fmt(f);
+  document.getElementById('prev-net').textContent   = (net>0?'+':'')+fmt(net);
+  document.getElementById('prev-net').style.color   = net>0?'var(--green)':'var(--red)';
+}
+
+function updateDurPreview() {
+  const s = document.getElementById('inp-start').value;
+  const e = document.getElementById('inp-end').value;
+  const d = calcDuration(s,e);
+  const el = document.getElementById('dur-preview');
+  const { avgDur } = stats();
+  if (d!==null) {
+    el.style.display='block';
+    el.innerHTML = `⏱ ${d} min trip <span>· avg is ${avgDur.toFixed(0)} min</span>`;
+  } else { el.style.display='none'; }
+}
+
+function logRun() {
+  const errEl = document.getElementById('log-error');
+  errEl.style.display='none';
+  const bal  = pn(document.getElementById('inp-balance').value);
+  const fuel = pn(document.getElementById('inp-fuel').value);
+  const dur  = calcDuration(
+    document.getElementById('inp-start').value,
+    document.getElementById('inp-end').value
+  );
+  if (isNaN(bal)||isNaN(fuel)) {
+    errEl.textContent='Balance and fuel cost are required.';
+    errEl.style.display='block'; return;
+  }
+  const prev = runs[runs.length-1];
+  const net   = bal - prev.balance;
+  const gross = net + fuel;
+  const { completed } = stats();
+  runs.push({ id:Date.now(), run:`Run ${completed.length+1}`, balance:bal, fuel, gross, net, duration:dur, timestamp:new Date().toISOString() });
+  document.getElementById('inp-balance').value='';
+  document.getElementById('inp-fuel').value='';
+  document.getElementById('inp-start').value='';
+  document.getElementById('inp-end').value='';
+  document.getElementById('run-preview').style.display='none';
+  document.getElementById('dur-preview').style.display='none';
+  save(); render();
+  switchTab('dashboard');
+}
+
+function undoLast() {
+  if (runs.length > 1) { runs.pop(); save(); render(); }
+}
+
+function resetAll() {
+  if (!confirm('Reset all run data? Settings will be kept.')) return;
+  runs = JSON.parse(JSON.stringify(INITIAL_RUNS));
+  save(); render();
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+function loadSettingsToForm() {
+  document.getElementById('set-current-ship').value    = settings.currentShip;
+  document.getElementById('set-current-sale').value    = settings.currentSale;
+  document.getElementById('set-sell-point').value      = settings.sellPoint;
+  document.getElementById('set-profit-nm').value       = settings.profitNM;
+  document.getElementById('set-target-ship').value     = settings.targetShip;
+  document.getElementById('set-target-price').value    = settings.targetPrice;
+  document.getElementById('set-target-profit-nm').value= settings.targetProfitNM;
+  document.getElementById('set-cargo').value           = settings.cargo;
+  document.getElementById('set-route').value           = settings.route;
+  document.getElementById('set-distance').value        = settings.distance;
+  document.getElementById('set-start-balance').value   = settings.startBalance;
+}
+
+function saveSettings() {
+  // auto-save as user types
+  applySettings(true);
+}
+
+function applySettings(silent=false) {
+  const g = id => pn(document.getElementById(id).value);
+  const gs = id => document.getElementById(id).value.trim();
+  settings.currentShip    = gs('set-current-ship')    || settings.currentShip;
+  settings.currentSale    = g('set-current-sale')     || settings.currentSale;
+  settings.sellPoint      = g('set-sell-point')       || settings.sellPoint;
+  settings.profitNM       = g('set-profit-nm')        || settings.profitNM;
+  settings.targetShip     = gs('set-target-ship')     || settings.targetShip;
+  settings.targetPrice    = g('set-target-price')     || settings.targetPrice;
+  settings.targetProfitNM = g('set-target-profit-nm') || settings.targetProfitNM;
+  settings.cargo          = gs('set-cargo')           || settings.cargo;
+  settings.route          = gs('set-route')           || settings.route;
+  settings.distance       = g('set-distance')         || settings.distance;
+  settings.startBalance   = g('set-start-balance')    || settings.startBalance;
+  save(); render();
+  if (!silent) {
+    const el = document.getElementById('settings-saved');
+    el.style.display='block';
+    setTimeout(()=>el.style.display='none', 2000);
+  }
+}
+
+// ── EXPORT / IMPORT ────────────────────────────────────────────────────────
+function exportJSON() {
+  const data = JSON.stringify({ runs, settings }, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
+  a.download = `shipping-grind-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function exportCSV() {
+  const rows = [['Run','Balance','Fuel','Gross','Net','Duration (min)','Timestamp']];
+  runs.forEach(r => rows.push([r.run, r.balance, r.fuel, r.gross, r.net, r.duration||'', r.timestamp]));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `shipping-runs-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function importJSON() {
+  const errEl = document.getElementById('import-error');
+  errEl.style.display='none';
+  try {
+    const data = JSON.parse(document.getElementById('import-area').value);
+    if (!data.runs || !Array.isArray(data.runs)) throw new Error('Invalid format');
+    runs = data.runs;
+    if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
+    save(); loadSettingsToForm(); render();
+    document.getElementById('import-area').value='';
+    alert('Data imported successfully!');
+  } catch(e) {
+    errEl.textContent = 'Invalid JSON: ' + e.message;
+    errEl.style.display='block';
+  }
+}
+
+function copyShareURL() {
+  const data = btoa(encodeURIComponent(JSON.stringify({ runs, settings })));
+  const url  = location.href.split('?')[0] + '?data=' + data;
+  navigator.clipboard.writeText(url).then(()=>{
+    const el = document.getElementById('share-copied');
+    el.style.display='block';
+    setTimeout(()=>el.style.display='none', 2000);
+  });
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(location.search);
+  if (p.has('data')) {
+    try {
+      const data = JSON.parse(decodeURIComponent(atob(p.get('data'))));
+      if (data.runs) runs = data.runs;
+      if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
+    } catch {}
+  }
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(el=>{
+    if(el.textContent.toLowerCase().replace(' ','').startsWith(name.replace('-',''))) el.classList.add('active');
+  });
+  if (name==='dashboard') drawChart(
+    Math.ceil(Math.max(0, settings.sellPoint - runs[runs.length-1].balance) / stats().avgNet),
+    stats().avgNet, settings.sellPoint, settings.targetPrice
+  );
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+load();
+loadFromURL();
+loadSettingsToForm();
+render();
+window.addEventListener('resize', ()=>render());
+</script>
+</body>
+</html>
