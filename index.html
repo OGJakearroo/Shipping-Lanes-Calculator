@@ -554,6 +554,8 @@
               <th class="right">ODO START</th>
               <th class="right">ODO END</th>
               <th class="right">DURATION</th>
+              <th class="right">$/NM</th>
+              <th class="right">$/MIN</th>
               <th class="right"></th>
             </tr>
           </thead>
@@ -988,6 +990,8 @@ function render() {
       <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoStart')">${r.odoStart ? Math.round(r.odoStart).toLocaleString() : '\u2014'}</td>
       <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoEnd')">${r.odoEnd ? Math.round(r.odoEnd).toLocaleString() : '\u2014'}</td>
       <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
+      <td class="right" style="color:var(--cyan)">${(r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? fmtf(r.net / (r.odoEnd - r.odoStart)) : '\u2014'}</td>
+      <td class="right" style="color:var(--green)">${(r.duration && r.duration > 0) ? fmtf(r.net / r.duration) : '\u2014'}</td>
       <td class="right">${idx > 0 ? `<button onclick="deleteRun(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:0 4px" title="Delete run">&times;</button>` : ''}</td>
     </tr>`).join('');
 
