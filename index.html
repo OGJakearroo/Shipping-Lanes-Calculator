@@ -122,6 +122,8 @@
   .field { margin-bottom: 16px; }
   .field-label { font-size: 0.75rem; font-weight: 600; color: var(--text); letter-spacing: 0.05em; margin-bottom: 4px; }
   .field-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+  .chart-toggle { --tog-color: var(--cyan); background: none; border: 1px solid var(--tog-color); border-radius: 12px; color: var(--tog-color); font-size: 0.65rem; font-family: var(--mono); letter-spacing: 0.05em; padding: 3px 10px; cursor: pointer; opacity: 0.45; transition: opacity 0.15s; }
+  .chart-toggle.active { opacity: 1; background: color-mix(in srgb, var(--tog-color) 12%, transparent); }
   .log-hint-tooltip { display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent); border-radius: 20px; padding: 5px 12px; font-size: 0.72rem; font-family: var(--mono); color: var(--cyan); margin-bottom: 16px; }
   input[type=text], input[type=number], input[type=time], select, textarea {
     width: 100%;
@@ -422,7 +424,14 @@
       </div>
 
       <div class="card">
-        <div class="card-label">BALANCE PROGRESSION + PROJECTION &nbsp;<span style="color:var(--purple);font-size:0.65rem">&#9646; TRIP DURATION (min)</span></div>
+        <div class="card-label" style="margin-bottom:10px">BALANCE PROGRESSION + PROJECTION</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px" id="chart-toggles">
+          <button class="chart-toggle active" data-layer="projection" onclick="toggleChartLayer(this)">Projection</button>
+          <button class="chart-toggle active" data-layer="duration" onclick="toggleChartLayer(this)" style="--tog-color:var(--purple)">Duration</button>
+          <button class="chart-toggle active" data-layer="odometer" onclick="toggleChartLayer(this)" style="--tog-color:#f9a825">Odometer</button>
+          <button class="chart-toggle active" data-layer="sell" onclick="toggleChartLayer(this)" style="--tog-color:var(--orange)">Sell point</button>
+          <button class="chart-toggle active" data-layer="target" onclick="toggleChartLayer(this)" style="--tog-color:var(--green)">Target</button>
+        </div>
         <div id="chart-container"></div>
       </div>
     </div>
@@ -443,6 +452,12 @@
         <div class="field-label">Fuel Cost ($)</div>
         <div class="field-hint">Amount spent refuelling this trip</div>
         <input type="text" id="inp-fuel" placeholder="e.g. 370,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">Odometer (NM) &mdash; optional</div>
+        <div class="field-hint">Your ship's current nautical mile reading</div>
+        <input type="text" id="inp-odometer" placeholder="e.g. 14,250" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
       </div>
 
       <div class="field">
@@ -482,7 +497,7 @@
         <div class="card-label" id="hist-label">RUN HISTORY</div>
         <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 12px" onclick="undoLast()">UNDO LAST</button>
       </div>
-      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, and Duration are editable.</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, Odometer, and Duration are editable.</div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -492,7 +507,9 @@
               <th class="right">FUEL</th>
               <th class="right">GROSS</th>
               <th class="right">NET</th>
+              <th class="right">ODOMETER</th>
               <th class="right">DURATION</th>
+              <th class="right"></th>
             </tr>
           </thead>
           <tbody id="history-tbody"></tbody>
@@ -869,7 +886,9 @@ function render() {
       <td class="right" style="color:var(--red);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'fuel')">${r.fuel ? '-' + fmt(r.fuel) : '\u2014'}</td>
       <td class="right">${r.gross ? fmt(r.gross) : '\u2014'}</td>
       <td class="right" style="color:${r.net > 0 ? 'var(--green)' : 'var(--red)'}">${r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014'}</td>
+      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odometer')">${r.odometer ? Math.round(r.odometer).toLocaleString() + ' NM' : '\u2014'}</td>
       <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
+      <td class="right">${idx > 0 ? `<button onclick="deleteRun(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:0 4px" title="Delete run">&times;</button>` : ''}</td>
     </tr>`).join('');
 
   document.getElementById('hist-label').textContent = `RUN HISTORY \u00B7 ${completed.length} runs logged`;
@@ -884,6 +903,23 @@ function render() {
 }
 
 // ── CHART (canvas) ─────────────────────────────────────────────────────────
+const chartLayers = { projection: true, duration: true, odometer: true, sell: true, target: true };
+
+function toggleChartLayer(btn) {
+  const layer = btn.dataset.layer;
+  chartLayers[layer] = !chartLayers[layer];
+  btn.classList.toggle('active', chartLayers[layer]);
+  const { tripsToSell, avgNet, sellPoint, targetPrice } = (() => {
+    const { completed, timed } = stats();
+    const avgNet = completed.length > 1 ? completed.slice(1).reduce((a,r)=>a+r.net,0)/(completed.length-1) : 0;
+    const sp = settings.sellPoint || 0;
+    const tp = settings.targetPrice || 0;
+    const tts = avgNet > 0 ? Math.ceil(Math.max(0, sp - runs[runs.length-1].balance) / avgNet) : 0;
+    return { tripsToSell: tts, avgNet, sellPoint: sp, targetPrice: tp };
+  })();
+  drawChart(tripsToSell, avgNet, sellPoint, targetPrice);
+}
+
 function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   const isLight = document.body.classList.contains('light');
   const container = document.getElementById('chart-container');
@@ -907,6 +943,7 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   const clrSell   = isLight ? '#bf5e00' : '#ffa726';
   const clrTarget = isLight ? '#2e7d32' : '#66bb6a';
   const clrDur    = isLight ? '#6a1b9a' : '#ab47bc';
+  const clrOdo    = '#f9a825';
 
   // Build data points
   const actual = runs.map((r, i) => ({ x: i, y: r.balance, label: r.run }));
@@ -925,7 +962,7 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
 
   const timedRuns = runs.filter(r => r.duration);
   const maxDur    = timedRuns.length ? Math.max(...timedRuns.map(r => r.duration)) : 0;
-  const hasDur    = maxDur > 0;
+  const hasDur    = maxDur > 0 && chartLayers.duration;
   const PAD = { l: 60, r: hasDur ? 52 : 16, t: 14, b: 28 };
   const gW  = W - PAD.l - PAD.r;
   const gH  = H - PAD.t - PAD.b;
@@ -956,11 +993,11 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
     ctx.fillText(label, PAD.l + 3, y - 3);
     ctx.restore();
   };
-  drawRef(sellPoint,   clrSell,   'SELL');
-  drawRef(targetPrice, clrTarget, 'TARGET');
+  if (chartLayers.sell)   drawRef(sellPoint,   clrSell,   'SELL');
+  if (chartLayers.target) drawRef(targetPrice, clrTarget, 'TARGET');
 
   // Projected line
-  if (proj.length > 0) {
+  if (chartLayers.projection && proj.length > 0) {
     const projPts = [actual[actual.length - 1], ...proj];
     ctx.save();
     ctx.strokeStyle = clrProj; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
@@ -988,7 +1025,7 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   ctx.restore();
 
   // Duration bars (right y-axis)
-  if (hasDur) {
+  if (chartLayers.duration && hasDur) {
     const yOfDur = d => PAD.t + gH - (d / maxDur) * gH;
     const BAR_W  = Math.max(4, Math.min(10, gW / (runs.length * 2)));
 
@@ -1012,6 +1049,26 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
       const y = PAD.t + (i / 4) * gH;
       ctx.fillText(Math.round(d) + 'm', W - PAD.r + 4, y + 3);
     }
+  }
+
+  // Odometer line
+  const odoRuns = runs.map((r, i) => ({ x: i, v: r.odometer })).filter(p => p.v != null);
+  if (chartLayers.odometer && odoRuns.length > 1) {
+    const minOdo = Math.min(...odoRuns.map(p => p.v));
+    const maxOdo = Math.max(...odoRuns.map(p => p.v));
+    const yOfOdo = v => maxOdo === minOdo ? PAD.t + gH / 2 : PAD.t + gH - ((v - minOdo) / (maxOdo - minOdo)) * gH;
+    ctx.save();
+    ctx.strokeStyle = clrOdo; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    odoRuns.forEach((p, i) => {
+      i === 0 ? ctx.moveTo(xOf(p.x), yOfOdo(p.v)) : ctx.lineTo(xOf(p.x), yOfOdo(p.v));
+    });
+    ctx.stroke();
+    odoRuns.forEach(p => {
+      ctx.beginPath(); ctx.arc(xOf(p.x), yOfOdo(p.v), 2, 0, Math.PI * 2);
+      ctx.fillStyle = clrOdo; ctx.fill();
+    });
+    ctx.restore();
   }
 
   // X labels
@@ -1054,6 +1111,7 @@ function logRun() {
   if (runs.length === 0) { showStartBalanceModal(); return; }
   const bal  = pn(document.getElementById('inp-balance').value);
   const fuel = pn(document.getElementById('inp-fuel').value);
+  const odo  = pn(document.getElementById('inp-odometer').value);
   const dur  = calcDuration(
     document.getElementById('inp-start').value,
     document.getElementById('inp-end').value
@@ -1073,13 +1131,15 @@ function logRun() {
     fuel,
     gross,
     net,
+    odometer: (!isNaN(odo) && odo > 0) ? odo : null,
     duration: dur,
     timestamp: new Date().toISOString()
   });
-  document.getElementById('inp-balance').value = '';
-  document.getElementById('inp-fuel').value    = '';
-  document.getElementById('inp-start').value   = '';
-  document.getElementById('inp-end').value     = '';
+  document.getElementById('inp-balance').value   = '';
+  document.getElementById('inp-fuel').value      = '';
+  document.getElementById('inp-odometer').value  = '';
+  document.getElementById('inp-start').value     = '';
+  document.getElementById('inp-end').value       = '';
   document.getElementById('run-preview').style.display  = 'none';
   document.getElementById('dur-preview').style.display  = 'none';
   save(); render();
@@ -1088,6 +1148,13 @@ function logRun() {
 
 function undoLast() {
   if (runs.length > 1) { runs.pop(); save(); render(); }
+}
+
+function deleteRun(idx) {
+  if (idx === 0 || idx >= runs.length) return;
+  runs.splice(idx, 1);
+  recalcRuns();
+  save(); render();
 }
 
 // ── HISTORY EDITING ────────────────────────────────────────────────────────
@@ -1103,8 +1170,9 @@ function editCell(e, idx, field) {
   if (td.querySelector('input')) return; // already editing
   const r = runs[idx];
   let rawVal = '';
-  if (field === 'balance')  rawVal = r.balance || '';
-  if (field === 'fuel')     rawVal = r.fuel    || '';
+  if (field === 'balance')  rawVal = r.balance  || '';
+  if (field === 'fuel')     rawVal = r.fuel     || '';
+  if (field === 'odometer') rawVal = r.odometer || '';
   if (field === 'duration') rawVal = r.duration || '';
   if (field === 'run')      rawVal = r.run;
 
@@ -1143,6 +1211,9 @@ function saveCell(idx, field, rawValue) {
       r.net   = r.balance - (runs[idx - 1]?.balance ?? r.balance);
       r.gross = r.net + r.fuel;
     }
+  } else if (field === 'odometer') {
+    const v = pn(rawValue);
+    r.odometer = (!isNaN(v) && v > 0) ? v : null;
   } else if (field === 'duration') {
     const v = parseInt(rawValue);
     r.duration = (!isNaN(v) && v > 0) ? v : null;
