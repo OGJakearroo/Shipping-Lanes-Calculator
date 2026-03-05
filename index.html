@@ -456,8 +456,17 @@
 
       <div class="field">
         <div class="field-label">Odometer (NM) &mdash; optional</div>
-        <div class="field-hint">Your ship's current nautical mile reading</div>
-        <input type="text" id="inp-odometer" placeholder="e.g. 14,250" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+        <div class="field-hint">Your ship's nautical mile reading at the start and end of this trip</div>
+        <div class="grid-2-input">
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">ODO START</div>
+            <input type="text" id="inp-odo-start" placeholder="e.g. 14,200" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+          </div>
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">ODO END</div>
+            <input type="text" id="inp-odo-end" placeholder="e.g. 14,560" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+          </div>
+        </div>
       </div>
 
       <div class="field">
@@ -497,7 +506,7 @@
         <div class="card-label" id="hist-label">RUN HISTORY</div>
         <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 12px" onclick="undoLast()">UNDO LAST</button>
       </div>
-      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, Odometer, and Duration are editable.</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, Odo Start, Odo End, and Duration are editable.</div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -507,7 +516,8 @@
               <th class="right">FUEL</th>
               <th class="right">GROSS</th>
               <th class="right">NET</th>
-              <th class="right">ODOMETER</th>
+              <th class="right">ODO START</th>
+              <th class="right">ODO END</th>
               <th class="right">DURATION</th>
               <th class="right"></th>
             </tr>
@@ -886,7 +896,8 @@ function render() {
       <td class="right" style="color:var(--red);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'fuel')">${r.fuel ? '-' + fmt(r.fuel) : '\u2014'}</td>
       <td class="right">${r.gross ? fmt(r.gross) : '\u2014'}</td>
       <td class="right" style="color:${r.net > 0 ? 'var(--green)' : 'var(--red)'}">${r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014'}</td>
-      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odometer')">${r.odometer ? Math.round(r.odometer).toLocaleString() + ' NM' : '\u2014'}</td>
+      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoStart')">${r.odoStart ? Math.round(r.odoStart).toLocaleString() : '\u2014'}</td>
+      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoEnd')">${r.odoEnd ? Math.round(r.odoEnd).toLocaleString() : '\u2014'}</td>
       <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
       <td class="right">${idx > 0 ? `<button onclick="deleteRun(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:0 4px" title="Delete run">&times;</button>` : ''}</td>
     </tr>`).join('');
@@ -1052,7 +1063,7 @@ function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
   }
 
   // Odometer line
-  const odoRuns = runs.map((r, i) => ({ x: i, v: r.odometer })).filter(p => p.v != null);
+  const odoRuns = runs.map((r, i) => ({ x: i, v: r.odoEnd ?? r.odoStart ?? null })).filter(p => p.v != null);
   if (chartLayers.odometer && odoRuns.length > 1) {
     const minOdo = Math.min(...odoRuns.map(p => p.v));
     const maxOdo = Math.max(...odoRuns.map(p => p.v));
@@ -1111,7 +1122,8 @@ function logRun() {
   if (runs.length === 0) { showStartBalanceModal(); return; }
   const bal  = pn(document.getElementById('inp-balance').value);
   const fuel = pn(document.getElementById('inp-fuel').value);
-  const odo  = pn(document.getElementById('inp-odometer').value);
+  const odoStart = pn(document.getElementById('inp-odo-start').value);
+  const odoEnd   = pn(document.getElementById('inp-odo-end').value);
   const dur  = calcDuration(
     document.getElementById('inp-start').value,
     document.getElementById('inp-end').value
@@ -1131,13 +1143,15 @@ function logRun() {
     fuel,
     gross,
     net,
-    odometer: (!isNaN(odo) && odo > 0) ? odo : null,
+    odoStart: (!isNaN(odoStart) && odoStart > 0) ? odoStart : null,
+    odoEnd:   (!isNaN(odoEnd)   && odoEnd   > 0) ? odoEnd   : null,
     duration: dur,
     timestamp: new Date().toISOString()
   });
   document.getElementById('inp-balance').value   = '';
   document.getElementById('inp-fuel').value      = '';
-  document.getElementById('inp-odometer').value  = '';
+  document.getElementById('inp-odo-start').value = '';
+  document.getElementById('inp-odo-end').value   = '';
   document.getElementById('inp-start').value     = '';
   document.getElementById('inp-end').value       = '';
   document.getElementById('run-preview').style.display  = 'none';
@@ -1172,7 +1186,8 @@ function editCell(e, idx, field) {
   let rawVal = '';
   if (field === 'balance')  rawVal = r.balance  || '';
   if (field === 'fuel')     rawVal = r.fuel     || '';
-  if (field === 'odometer') rawVal = r.odometer || '';
+  if (field === 'odoStart') rawVal = r.odoStart || '';
+  if (field === 'odoEnd')   rawVal = r.odoEnd   || '';
   if (field === 'duration') rawVal = r.duration || '';
   if (field === 'run')      rawVal = r.run;
 
@@ -1211,9 +1226,12 @@ function saveCell(idx, field, rawValue) {
       r.net   = r.balance - (runs[idx - 1]?.balance ?? r.balance);
       r.gross = r.net + r.fuel;
     }
-  } else if (field === 'odometer') {
+  } else if (field === 'odoStart') {
     const v = pn(rawValue);
-    r.odometer = (!isNaN(v) && v > 0) ? v : null;
+    r.odoStart = (!isNaN(v) && v > 0) ? v : null;
+  } else if (field === 'odoEnd') {
+    const v = pn(rawValue);
+    r.odoEnd = (!isNaN(v) && v > 0) ? v : null;
   } else if (field === 'duration') {
     const v = parseInt(rawValue);
     r.duration = (!isNaN(v) && v > 0) ? v : null;
