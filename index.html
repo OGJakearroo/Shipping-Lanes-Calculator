@@ -143,6 +143,8 @@
     color-scheme: light;
   }
   input:focus, select:focus, textarea:focus { border-color: var(--cyan); }
+  input[readonly] { opacity: 0.6; cursor: default; border-style: dashed; }
+  input[readonly]:focus { border-color: var(--input-border); }
   .grid-2-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .duration-hint { margin-top: 8px; font-size: 0.78rem; color: var(--purple); font-family: var(--mono); }
   .duration-hint span { color: var(--muted); font-size: 0.7rem; }
@@ -438,21 +440,24 @@
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Ship Name</div>
+          <div class="field-hint">The name of the ship you're currently sailing</div>
           <input type="text" id="set-current-ship" placeholder="e.g. Capesize" oninput="saveSettings()">
         </div>
         <div class="field">
           <div class="field-label">Resale Value ($)</div>
-          <div class="field-hint">What you'll get when you sell (30% of purchase)</div>
-          <input type="text" id="set-current-sale" placeholder="e.g. 13800000" oninput="saveSettings()">
+          <div class="field-hint">What you'll get when you sell it (typically 30% of purchase price)</div>
+          <input type="text" id="set-current-sale" placeholder="e.g. 13800000" oninput="calcSellPoint()">
         </div>
         <div class="field">
           <div class="field-label">Sell-Point Balance ($)</div>
-          <div class="field-hint">Balance at which to sell your current ship</div>
-          <input type="text" id="set-sell-point" placeholder="e.g. 231200000" oninput="saveSettings()">
+          <div class="field-hint">Auto-calculated: Target Price &minus; Resale Value. You can override this.</div>
+          <input type="text" id="set-sell-point" placeholder="Auto-calculated" readonly
+            onclick="this.removeAttribute('readonly');this.focus()"
+            onblur="saveSettings()">
         </div>
         <div class="field">
           <div class="field-label">Profit per NM ($/NM)</div>
-          <div class="field-hint">Your current ship's earnings rate</div>
+          <div class="field-hint">Your current ship's per-nautical-mile earnings rate</div>
           <input type="text" id="set-profit-nm" placeholder="e.g. 340000" oninput="saveSettings()">
         </div>
       </div>
@@ -463,19 +468,22 @@
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Target Ship Name</div>
+          <div class="field-hint">The ship you're grinding toward</div>
           <input type="text" id="set-target-ship" placeholder="e.g. Seamax Ore Carrier" oninput="saveSettings()">
         </div>
         <div class="field">
           <div class="field-label">Target Ship Price ($)</div>
-          <input type="text" id="set-target-price" placeholder="e.g. 245000000" oninput="saveSettings()">
+          <div class="field-hint">Full purchase price of the target ship</div>
+          <input type="text" id="set-target-price" placeholder="e.g. 245000000" oninput="calcSellPoint()">
         </div>
         <div class="field">
           <div class="field-label">Target Ship Profit/NM</div>
-          <div class="field-hint">For comparison once you upgrade</div>
+          <div class="field-hint">For earnings comparison once you upgrade</div>
           <input type="text" id="set-target-profit-nm" placeholder="e.g. 787500" oninput="saveSettings()">
         </div>
         <div class="field">
           <div class="field-label">Cargo Type</div>
+          <div class="field-hint">Type of cargo this ship carries</div>
           <input type="text" id="set-cargo" placeholder="e.g. Bulk, Ore, Gas, Containers" oninput="saveSettings()">
         </div>
       </div>
@@ -486,11 +494,12 @@
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Route Name</div>
+          <div class="field-hint">A label for the route you're running</div>
           <input type="text" id="set-route" placeholder="e.g. Rockfall to Wilmington Cove" oninput="saveSettings()">
         </div>
         <div class="field">
           <div class="field-label">Route Distance (NM paid)</div>
-          <div class="field-hint">Straight-line distance you get paid for</div>
+          <div class="field-hint">Straight-line distance you get paid for per trip</div>
           <input type="text" id="set-distance" placeholder="e.g. 26.1" oninput="saveSettings()">
         </div>
       </div>
@@ -935,6 +944,17 @@ function resetAll() {
   showStartBalanceModal();
 }
 
+// ── SELL POINT CALC ────────────────────────────────────────────────────────
+function calcSellPoint() {
+  const sale  = pn(document.getElementById('set-current-sale').value);
+  const price = pn(document.getElementById('set-target-price').value);
+  if (!isNaN(sale) && !isNaN(price) && sale >= 0 && price > 0) {
+    const sp = Math.max(0, price - sale);
+    document.getElementById('set-sell-point').value = sp;
+  }
+  saveSettings();
+}
+
 // ── SETTINGS ──────────────────────────────────────────────────────────────
 function loadSettingsToForm() {
   document.getElementById('set-current-ship').value     = settings.currentShip    || '';
@@ -948,6 +968,14 @@ function loadSettingsToForm() {
   document.getElementById('set-route').value            = settings.route          || '';
   document.getElementById('set-distance').value         = settings.distance       || '';
   document.getElementById('set-start-balance').value    = settings.startBalance   || '';
+  // Reflect auto-calculated sell point (don't override if already set)
+  if (settings.sellPoint) {
+    document.getElementById('set-sell-point').value = settings.sellPoint;
+  } else {
+    const sale  = settings.currentSale  || 0;
+    const price = settings.targetPrice  || 0;
+    if (price > 0) document.getElementById('set-sell-point').value = Math.max(0, price - sale);
+  }
 }
 
 function saveSettings() {
