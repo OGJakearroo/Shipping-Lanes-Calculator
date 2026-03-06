@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shipping Lanes Grind Tracker</title>
+<title>Shipping Lanes Tracker</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -283,8 +283,8 @@
 
     <!-- Step 1: Balance -->
     <div class="onboard-pane visible" id="ob-pane-0">
-      <div class="modal-title">Welcome to the Grind Tracker</div>
-      <div class="modal-subtitle">Track your Shipping Lanes grind, predict when you can afford your next ship, and export your data. Let's get you set up.</div>
+      <div class="modal-title">Welcome to Shipping Lanes Tracker</div>
+      <div class="modal-subtitle">Track your progress, predict when you can afford your next ship, and export your data. Let's get you set up.</div>
       <div class="field">
         <div class="field-label">Your Current Balance ($)</div>
         <div class="field-hint">Open Roblox and check your balance in-game right now</div>
@@ -328,7 +328,7 @@
     <!-- Step 3: Target ship -->
     <div class="onboard-pane" id="ob-pane-2">
       <div class="modal-title">Your Target Ship</div>
-      <div class="modal-subtitle">The ship you're grinding toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="modal-subtitle">The ship you're saving toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
       <div class="field">
         <div class="field-label">Target Ship Name</div>
         <div class="field-hint">e.g. VLCC, Ore Carrier</div>
@@ -364,7 +364,7 @@
   <div class="header-top">
     <div>
       <div class="title">&#9875; <span id="hdr-current-ship">—</span> &rarr; <span id="hdr-target-ship">—</span></div>
-      <div class="subtitle">ROBLOX SHIPPING LANES &middot; GRIND TRACKER &middot; <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;opacity:0.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">WIKI &#8599;</a></div>
+      <div class="subtitle">ROBLOX SHIPPING LANES &middot; PROGRESS TRACKER &middot; <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;opacity:0.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">WIKI &#8599;</a></div>
     </div>
     <div class="header-actions">
       <span class="save-badge" id="save-badge">&#9679; SAVED</span>
@@ -385,9 +385,9 @@
 <div class="body">
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
+    <button class="tab-btn" onclick="switchTab('efficiency')">EFFICIENCY</button>
     <button class="tab-btn" onclick="switchTab('log')">LOG RUN</button>
     <button class="tab-btn" onclick="switchTab('history')">HISTORY</button>
-    <button class="tab-btn" onclick="switchTab('efficiency')">EFFICIENCY</button>
     <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
     <button class="tab-btn" onclick="switchTab('export')">EXPORT / IMPORT</button>
   </div>
@@ -410,9 +410,9 @@
           <div class="card-label">Still Needed (sell point)</div>
           <div class="stat-val" style="color:var(--orange)" id="stat-needed">$0</div>
         </div>
-        <div class="card" style="border-color:#ef535022;margin-bottom:0">
-          <div class="card-label">Trips to Sell Point</div>
-          <div class="stat-val" style="color:var(--red)" id="stat-trips">~0 trips</div>
+        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
+          <div class="card-label">Avg Income / hr</div>
+          <div class="stat-val" style="color:var(--green)" id="stat-income-hr">—</div>
         </div>
         <div class="card" style="border-color:#ab47bc22;margin-bottom:0">
           <div class="card-label">Est. Time Remaining</div>
@@ -444,104 +444,6 @@
           <button class="chart-toggle active" data-layer="target" onclick="toggleChartLayer(this)" style="--tog-color:var(--green)">Target</button>
         </div>
         <div id="chart-container"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LOG RUN -->
-  <div class="tab-pane" id="tab-log">
-    <div class="card">
-      <div class="card-label">LOG NEW RUN</div>
-      <div id="log-hint" class="log-hint-tooltip" style="display:none"></div>
-
-      <div class="field">
-        <div class="field-label">New Balance ($)</div>
-        <div class="field-hint">Your total balance after unloading cargo</div>
-        <input type="text" id="inp-balance" placeholder="e.g. 63,000,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
-      </div>
-      <div class="field">
-        <div class="field-label">Fuel Cost ($)</div>
-        <div class="field-hint">Amount spent refuelling this trip</div>
-        <input type="text" id="inp-fuel" placeholder="e.g. 370,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
-      </div>
-
-      <div class="field">
-        <div class="field-label">Odometer (NM) &mdash; optional</div>
-        <div class="field-hint">Your ship's nautical mile reading at the start and end of this trip</div>
-        <div class="grid-2-input">
-          <div>
-            <div class="pred-label" style="margin-bottom:4px">ODO START</div>
-            <input type="text" id="inp-odo-start" placeholder="e.g. 14,200" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
-          </div>
-          <div>
-            <div class="pred-label" style="margin-bottom:4px">ODO END</div>
-            <input type="text" id="inp-odo-end" placeholder="e.g. 14,560" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">Trip Times &mdash; optional</div>
-        <div class="field-hint">Duration auto-calculated from start &rarr; end time</div>
-        <div class="grid-2-input">
-          <div>
-            <div class="pred-label" style="margin-bottom:4px">START TIME</div>
-            <input type="time" id="inp-start" oninput="updateDurPreview()">
-          </div>
-          <div>
-            <div class="pred-label" style="margin-bottom:4px">END TIME</div>
-            <input type="time" id="inp-end" oninput="updateDurPreview()">
-          </div>
-        </div>
-        <div class="duration-hint" id="dur-preview" style="display:none"></div>
-      </div>
-
-      <div class="preview" id="run-preview" style="display:none">
-        <div class="preview-label">PREVIEW</div>
-        <div class="preview-grid">
-          <div><span style="color:var(--muted)">Gross: </span><span id="prev-gross"></span></div>
-          <div><span style="color:var(--muted)">Fuel: </span><span style="color:var(--red)" id="prev-fuel"></span></div>
-          <div><span style="color:var(--muted)">Net: </span><span id="prev-net"></span></div>
-        </div>
-      </div>
-
-      <div class="error" id="log-error" style="display:none"></div>
-      <button class="btn btn-primary btn-full" id="log-btn" onclick="logRun()">+ LOG RUN</button>
-    </div>
-  </div>
-
-  <!-- HISTORY -->
-  <div class="tab-pane" id="tab-history">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div class="card-label" id="hist-label">RUN HISTORY</div>
-        <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 12px" onclick="undoLast()">UNDO LAST</button>
-      </div>
-      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, Odo Start, Odo End, and Duration are editable.</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="left">RUN</th>
-              <th class="right">BALANCE</th>
-              <th class="right">FUEL</th>
-              <th class="right">GROSS</th>
-              <th class="right">NET</th>
-              <th class="right">ODO START</th>
-              <th class="right">ODO END</th>
-              <th class="right">DURATION</th>
-              <th class="right">$/NM</th>
-              <th class="right">$/MIN</th>
-              <th class="right"></th>
-            </tr>
-          </thead>
-          <tbody id="history-tbody"></tbody>
-        </table>
-      </div>
-      <div class="totals-row" id="totals-row" style="display:none">
-        <div><span style="color:var(--muted)">Total earned: </span><span style="color:var(--green)" id="tot-earned"></span></div>
-        <div><span style="color:var(--muted)">Total fuel: </span><span style="color:var(--red)" id="tot-fuel"></span></div>
-        <div><span style="color:var(--muted)">Time logged: </span><span style="color:var(--purple)" id="tot-time"></span></div>
       </div>
     </div>
   </div>
@@ -627,6 +529,105 @@
     </div>
   </div>
 
+  <!-- LOG RUN -->
+  <div class="tab-pane" id="tab-log">
+    <div class="card">
+      <div class="card-label">LOG NEW RUN</div>
+      <div id="log-hint" class="log-hint-tooltip" style="display:none"></div>
+
+      <div class="field">
+        <div class="field-label">New Balance ($)</div>
+        <div class="field-hint">Your total balance after unloading cargo</div>
+        <input type="text" id="inp-balance" placeholder="e.g. 63,000,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+      </div>
+      <div class="field">
+        <div class="field-label">Fuel Cost ($)</div>
+        <div class="field-hint">Amount spent refuelling this trip</div>
+        <input type="text" id="inp-fuel" placeholder="e.g. 370,000" oninput="updatePreview()" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">Odometer (NM) &mdash; optional</div>
+        <div class="field-hint">Your ship's nautical mile reading at the start and end of this trip</div>
+        <div class="grid-2-input">
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">ODO START</div>
+            <input type="text" id="inp-odo-start" placeholder="e.g. 14,200" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+          </div>
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">ODO END</div>
+            <input type="text" id="inp-odo-end" placeholder="e.g. 14,560" onblur="formatInput(this)" onkeydown="if(event.key==='Enter')logRun()">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Trip Times &mdash; optional</div>
+        <div class="field-hint">Duration auto-calculated from start &rarr; end time</div>
+        <div class="grid-2-input">
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">START TIME</div>
+            <input type="time" id="inp-start" oninput="updateDurPreview()">
+          </div>
+          <div>
+            <div class="pred-label" style="margin-bottom:4px">END TIME</div>
+            <input type="time" id="inp-end" oninput="updateDurPreview()">
+          </div>
+        </div>
+        <div class="duration-hint" id="dur-preview" style="display:none"></div>
+      </div>
+
+      <div class="preview" id="run-preview" style="display:none">
+        <div class="preview-label">PREVIEW</div>
+        <div class="preview-grid">
+          <div><span style="color:var(--muted)">Gross: </span><span id="prev-gross"></span></div>
+          <div><span style="color:var(--muted)">Fuel: </span><span style="color:var(--red)" id="prev-fuel"></span></div>
+          <div><span style="color:var(--muted)">Net: </span><span id="prev-net"></span></div>
+        </div>
+      </div>
+
+      <div class="error" id="log-error" style="display:none"></div>
+      <button class="btn btn-primary btn-full" id="log-btn" onclick="logRun()">+ LOG RUN</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="tab-pane" id="tab-history">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div class="card-label" id="hist-label">RUN HISTORY</div>
+        <button class="btn btn-danger" style="font-size:0.72rem;padding:5px 12px" onclick="undoLast()">UNDO LAST</button>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Click any cell to edit &mdash; Run, Balance, Fuel, Odo Start, Odo End, and Duration are editable. Distance is calculated automatically.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="left">RUN</th>
+              <th class="right">BALANCE</th>
+              <th class="right">FUEL</th>
+              <th class="right">GROSS</th>
+              <th class="right">NET</th>
+              <th class="right">ODO START</th>
+              <th class="right">ODO END</th>
+              <th class="right">DISTANCE</th>
+              <th class="right">DURATION</th>
+              <th class="right">$/NM</th>
+              <th class="right">$/MIN</th>
+              <th class="right"></th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+      <div class="totals-row" id="totals-row" style="display:none">
+        <div><span style="color:var(--muted)">Total earned: </span><span style="color:var(--green)" id="tot-earned"></span></div>
+        <div><span style="color:var(--muted)">Total fuel: </span><span style="color:var(--red)" id="tot-fuel"></span></div>
+        <div><span style="color:var(--muted)">Time logged: </span><span style="color:var(--purple)" id="tot-time"></span></div>
+      </div>
+    </div>
+  </div>
+
   <!-- SETTINGS -->
   <div class="tab-pane" id="tab-settings">
     <div class="card settings-section">
@@ -662,7 +663,7 @@
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Target Ship Name</div>
-          <div class="field-hint">The ship you're grinding toward</div>
+          <div class="field-hint">The ship you're saving toward</div>
           <input type="text" id="set-target-ship" placeholder="e.g. Seamax Ore Carrier" oninput="saveSettings()">
         </div>
         <div class="field">
@@ -687,7 +688,7 @@
       <div class="settings-title">Starting Balance</div>
       <div class="field">
         <div class="field-label">Starting Balance ($)</div>
-        <div class="field-hint">Your balance at the beginning of this grind session. Changing this will update the Start entry in your history.</div>
+        <div class="field-hint">Your balance at the start of tracking. Changing this will update the Start entry in your history.</div>
         <input type="text" id="set-start-balance" placeholder="e.g. 55,301,835" oninput="saveSettings()" onblur="formatInput(this)">
       </div>
     </div>
@@ -738,6 +739,7 @@ const BUILD_DATE   = '2026-03-05';
 const STORAGE_KEY  = 'shipping-grind-v2';
 const SETTINGS_KEY = 'shipping-grind-settings-v2';
 const THEME_KEY    = 'shipping-grind-theme';
+const LOG_FORM_KEY = 'shipping-log-form-v1';
 
 const DEFAULT_SETTINGS = {
   currentShip: '',
@@ -949,10 +951,11 @@ function render() {
   const tripsToSell = avgNet > 0 ? Math.ceil(stillToSell / avgNet) : 0;
   const minsToSell  = tripsToSell * avgDur;
 
-  document.getElementById('stat-balance').textContent = fmt(latest.balance);
-  document.getElementById('stat-needed').textContent  = sellPoint > 0 ? fmt(stillToSell) : '—';
-  document.getElementById('stat-trips').textContent   = avgNet > 0 ? `~${tripsToSell} trips` : '—';
-  document.getElementById('stat-time').textContent    = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
+  const incomePerHour = timed.length > 0 ? (avgNet / avgDur) * 60 : 0;
+  document.getElementById('stat-balance').textContent    = fmt(latest.balance);
+  document.getElementById('stat-needed').textContent     = sellPoint > 0 ? fmt(stillToSell) : '—';
+  document.getElementById('stat-income-hr').textContent  = incomePerHour > 0 ? fmts(incomePerHour) : '—';
+  document.getElementById('stat-time').textContent       = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
 
   // Prediction
   // "Trips after selling" = if you sold NOW, how many more trips to target price
@@ -976,7 +979,7 @@ function render() {
   document.getElementById('pred-after-trips').textContent  = avgNet > 0 ? `~${tripsAfter} more trips` : '—';
   document.getElementById('pred-target-ship-label').textContent = (targetShip || 'TARGET SHIP').toUpperCase();
   document.getElementById('pred-total').textContent = avgNet > 0
-    ? `~${totalTrips} trips \u00B7 ~${totalHours.toFixed(1)} hrs of grinding`
+    ? `~${totalTrips} trips \u00B7 ~${totalHours.toFixed(1)} hrs estimated`
     : 'Log more runs for a prediction';
 
   // Log hint
@@ -996,6 +999,7 @@ function render() {
       <td class="right" style="color:${r.net > 0 ? 'var(--green)' : 'var(--red)'}">${r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014'}</td>
       <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoStart')">${r.odoStart ? Math.round(r.odoStart).toLocaleString() : '\u2014'}</td>
       <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoEnd')">${r.odoEnd ? Math.round(r.odoEnd).toLocaleString() : '\u2014'}</td>
+      <td class="right" style="color:#f9a825">${(r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? Math.round(r.odoEnd - r.odoStart).toLocaleString() + ' NM' : '\u2014'}</td>
       <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
       <td class="right" style="color:var(--cyan)">${(r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? fmtf(r.net / (r.odoEnd - r.odoStart)) : '\u2014'}</td>
       <td class="right" style="color:var(--green)">${(r.duration && r.duration > 0) ? fmtf(r.net / r.duration) : '\u2014'}</td>
@@ -1257,6 +1261,7 @@ function logRun() {
   document.getElementById('inp-end').value       = '';
   document.getElementById('run-preview').style.display  = 'none';
   document.getElementById('dur-preview').style.display  = 'none';
+  clearLogForm();
   save(); render();
   switchTab('dashboard');
 }
@@ -1422,7 +1427,7 @@ function exportStamp() {
   const now = new Date();
   const date = now.toISOString().slice(0, 10);
   const time = now.toTimeString().slice(0, 5).replace(':', 'h') + 'm';
-  const ship = (settings.currentShip || 'grind').replace(/\s+/g, '-').toLowerCase();
+  const ship = (settings.currentShip || 'export').replace(/\s+/g, '-').toLowerCase();
   return `${ship}_${date}_${time}`;
 }
 
@@ -1535,6 +1540,40 @@ function loadFromURL() {
       if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
     }
   } catch {}
+}
+
+// ── LOG FORM PERSISTENCE ───────────────────────────────────────────────────
+function saveLogForm() {
+  try {
+    localStorage.setItem(LOG_FORM_KEY, JSON.stringify({
+      balance:  document.getElementById('inp-balance').value,
+      fuel:     document.getElementById('inp-fuel').value,
+      odoStart: document.getElementById('inp-odo-start').value,
+      odoEnd:   document.getElementById('inp-odo-end').value,
+      start:    document.getElementById('inp-start').value,
+      end:      document.getElementById('inp-end').value,
+    }));
+  } catch {}
+}
+
+function loadLogForm() {
+  try {
+    const raw = localStorage.getItem(LOG_FORM_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.balance)  document.getElementById('inp-balance').value   = d.balance;
+    if (d.fuel)     document.getElementById('inp-fuel').value      = d.fuel;
+    if (d.odoStart) document.getElementById('inp-odo-start').value = d.odoStart;
+    if (d.odoEnd)   document.getElementById('inp-odo-end').value   = d.odoEnd;
+    if (d.start)    document.getElementById('inp-start').value     = d.start;
+    if (d.end)      document.getElementById('inp-end').value       = d.end;
+    updatePreview();
+    updateDurPreview();
+  } catch {}
+}
+
+function clearLogForm() {
+  localStorage.removeItem(LOG_FORM_KEY);
 }
 
 // ── EFFICIENCY TAB ─────────────────────────────────────────────────────────
@@ -1754,13 +1793,22 @@ if (runs.length === 0) {
   render();
 }
 
+loadLogForm();
+
+['inp-balance','inp-fuel','inp-odo-start','inp-odo-end','inp-start','inp-end'].forEach(id => {
+  document.getElementById(id).addEventListener('input', saveLogForm);
+});
+
 window.addEventListener('resize', () => { if (runs.length > 0) render(); });
 
 // Build date footer
 document.body.insertAdjacentHTML('beforeend',
-  `<div style="text-align:center;padding:16px 0 24px;font-size:0.65rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.1em">
+  `<div style="text-align:center;padding:16px 0 8px;font-size:0.65rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.1em">
     BUILD ${BUILD_DATE} &nbsp;&middot;&nbsp;
     <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.8">SHIPPING LANES WIKI &#8599;</a>
+  </div>
+  <div style="text-align:center;padding:0 24px 24px;font-size:0.62rem;color:var(--muted);font-family:var(--mono);opacity:0.5;line-height:1.6">
+    Entirely vibe coded &mdash; AI-assisted, no formal engineering process. Works fine, probably.
   </div>`);
 </script>
 </body>
