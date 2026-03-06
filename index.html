@@ -387,6 +387,7 @@
     <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
     <button class="tab-btn" onclick="switchTab('log')">LOG RUN</button>
     <button class="tab-btn" onclick="switchTab('history')">HISTORY</button>
+    <button class="tab-btn" onclick="switchTab('efficiency')">EFFICIENCY</button>
     <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
     <button class="tab-btn" onclick="switchTab('export')">EXPORT / IMPORT</button>
   </div>
@@ -417,14 +418,6 @@
           <div class="card-label">Est. Time Remaining</div>
           <div class="stat-val" style="color:var(--purple)" id="stat-time">~0 hrs</div>
         </div>
-        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
-          <div class="card-label">Avg Income / Min</div>
-          <div class="stat-val" style="color:var(--green)" id="stat-income-min">—</div>
-        </div>
-        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
-          <div class="card-label">Avg Income / Hour</div>
-          <div class="stat-val" style="color:var(--green)" id="stat-income-hour">—</div>
-        </div>
       </div>
 
       <div class="card">
@@ -439,23 +432,6 @@
           <div class="pred-label">TOTAL TO <span id="pred-target-ship-label">TARGET SHIP</span></div>
           <div style="color:var(--cyan);font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="pred-total">—</div>
         </div>
-      </div>
-
-      <div class="card" id="eff-card">
-        <div class="card-label">EFFICIENCY</div>
-        <div class="prediction-grid">
-          <div><div class="pred-label">AVG $/NM</div><div class="pred-val" style="color:var(--cyan)" id="eff-nm">—</div></div>
-          <div><div class="pred-label">AVG $/MIN</div><div class="pred-val" style="color:var(--green)" id="eff-min">—</div></div>
-          <div><div class="pred-label">TARGET SHIP $/NM</div><div class="pred-val" style="color:var(--orange)" id="eff-target-nm">—</div></div>
-          <div><div class="pred-label">UPGRADE BOOST</div><div class="pred-val" id="eff-gain">—</div></div>
-        </div>
-        <div id="eff-advertised-row" class="prediction-footer" style="display:none">
-          <div class="prediction-grid" style="margin-top:0">
-            <div><div class="pred-label">ADVERTISED $/NM</div><div class="pred-val" style="color:var(--muted)" id="eff-advertised-nm">—</div></div>
-            <div><div class="pred-label">VS ADVERTISED</div><div class="pred-val" id="eff-vs-advertised">—</div></div>
-          </div>
-        </div>
-        <div id="eff-hint" style="margin-top:10px;font-size:0.7rem;color:var(--muted);font-family:var(--mono);display:none"></div>
       </div>
 
       <div class="card">
@@ -566,6 +542,87 @@
         <div><span style="color:var(--muted)">Total earned: </span><span style="color:var(--green)" id="tot-earned"></span></div>
         <div><span style="color:var(--muted)">Total fuel: </span><span style="color:var(--red)" id="tot-fuel"></span></div>
         <div><span style="color:var(--muted)">Time logged: </span><span style="color:var(--purple)" id="tot-time"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EFFICIENCY -->
+  <div class="tab-pane" id="tab-efficiency">
+    <div id="eff2-empty" class="card" style="display:none">
+      <div class="empty-state">
+        <div class="empty-state-title">No runs logged yet</div>
+        <div class="empty-state-desc">Log runs with odometer readings or trip times to see efficiency metrics.</div>
+      </div>
+    </div>
+    <div id="eff2-content">
+      <div class="grid-2">
+        <div class="card" style="border-color:var(--cyan-dim);margin-bottom:0">
+          <div class="card-label">Avg $/NM</div>
+          <div class="stat-val" style="color:var(--cyan)" id="eff2-avg-nm">—</div>
+        </div>
+        <div class="card" style="border-color:var(--cyan-dim);margin-bottom:0">
+          <div class="card-label">Best $/NM</div>
+          <div class="stat-val" style="color:var(--cyan)" id="eff2-best-nm">—</div>
+        </div>
+        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
+          <div class="card-label">Avg $/min</div>
+          <div class="stat-val" style="color:var(--green)" id="eff2-avg-min">—</div>
+        </div>
+        <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
+          <div class="card-label">Best $/min</div>
+          <div class="stat-val" style="color:var(--green)" id="eff2-best-min">—</div>
+        </div>
+        <div class="card" style="border-color:#f9a82522;margin-bottom:0">
+          <div class="card-label">Total NM Sailed</div>
+          <div class="stat-val" style="color:#f9a825" id="eff2-total-nm">—</div>
+        </div>
+        <div class="card" style="border-color:#ab47bc22;margin-bottom:0">
+          <div class="card-label">Total Time Logged</div>
+          <div class="stat-val" style="color:var(--purple)" id="eff2-total-time">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">$/NM TREND</div>
+        <div id="eff2-chart-container" style="width:100%;height:220px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">SHIP EFFICIENCY COMPARISON</div>
+        <div class="prediction-grid">
+          <div><div class="pred-label">ADVERTISED $/NM</div><div class="pred-val" style="color:var(--muted)" id="eff2-advertised-nm">—</div></div>
+          <div><div class="pred-label">YOUR ACTUAL $/NM</div><div class="pred-val" style="color:var(--cyan)" id="eff2-actual-nm">—</div></div>
+          <div><div class="pred-label">VS ADVERTISED</div><div class="pred-val" id="eff2-vs-adv">—</div></div>
+          <div><div class="pred-label">TARGET SHIP $/NM</div><div class="pred-val" style="color:var(--purple)" id="eff2-target-nm">—</div></div>
+        </div>
+        <div class="prediction-footer">
+          <div class="pred-label">UPGRADE EARNINGS BOOST</div>
+          <div style="font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="eff2-gain">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="eff2-table-label">PER-RUN EFFICIENCY</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:12px">Runs without odometer or time data show &mdash; for those columns.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="left">RUN</th>
+                <th class="right">DISTANCE</th>
+                <th class="right">$/NM</th>
+                <th class="right">$/MIN</th>
+                <th class="right">VS AVG $/NM</th>
+              </tr>
+            </thead>
+            <tbody id="eff2-tbody"></tbody>
+          </table>
+        </div>
+        <div class="totals-row" id="eff2-totals-row" style="display:none;grid-template-columns:1fr 1fr 1fr">
+          <div><span style="color:var(--muted)">Total distance: </span><span style="color:#f9a825" id="eff2-tot-nm-row"></span></div>
+          <div><span style="color:var(--muted)">Avg $/NM: </span><span style="color:var(--cyan)" id="eff2-tot-avg-nm"></span></div>
+          <div><span style="color:var(--muted)">Avg $/min: </span><span style="color:var(--green)" id="eff2-tot-avg-min"></span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -896,56 +953,6 @@ function render() {
   document.getElementById('stat-needed').textContent  = sellPoint > 0 ? fmt(stillToSell) : '—';
   document.getElementById('stat-trips').textContent   = avgNet > 0 ? `~${tripsToSell} trips` : '—';
   document.getElementById('stat-time').textContent    = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
-  const incomePerMin  = timed.length > 0 ? avgNet / avgDur : 0;
-  const incomePerHour = incomePerMin * 60;
-  document.getElementById('stat-income-min').textContent  = incomePerMin  > 0 ? fmtf(incomePerMin)  : '—';
-  document.getElementById('stat-income-hour').textContent = incomePerHour > 0 ? fmts(incomePerHour) : '—';
-
-  // Efficiency
-  const nmRuns = completed.filter(r => r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0);
-  const avgProfitNM = nmRuns.length
-    ? nmRuns.reduce((a, r) => a + r.net / (r.odoEnd - r.odoStart), 0) / nmRuns.length
-    : 0;
-  const targetNM = settings.targetProfitNM;
-
-  document.getElementById('eff-nm').textContent  = avgProfitNM > 0 ? fmtf(avgProfitNM) + '/NM' : '—';
-  document.getElementById('eff-min').textContent = incomePerMin > 0 ? fmtf(incomePerMin) + '/min' : '—';
-  document.getElementById('eff-target-nm').textContent = targetNM > 0 ? fmtf(targetNM) + '/NM' : '—';
-
-  const advertisedNM  = settings.profitNM;
-  const advRow        = document.getElementById('eff-advertised-row');
-  if (advertisedNM > 0) {
-    advRow.style.display = 'block';
-    document.getElementById('eff-advertised-nm').textContent = fmtf(advertisedNM) + '/NM';
-    const vsAdvEl = document.getElementById('eff-vs-advertised');
-    if (avgProfitNM > 0) {
-      const vsAdv = (avgProfitNM - advertisedNM) / advertisedNM * 100;
-      vsAdvEl.textContent = (vsAdv >= 0 ? '+' : '') + vsAdv.toFixed(0) + '%';
-      vsAdvEl.style.color = vsAdv >= 0 ? 'var(--green)' : 'var(--red)';
-    } else {
-      vsAdvEl.textContent = '—';
-      vsAdvEl.style.color = '';
-    }
-  } else {
-    advRow.style.display = 'none';
-  }
-
-  const gainEl   = document.getElementById('eff-gain');
-  const hintEl   = document.getElementById('eff-hint');
-  if (targetNM > 0 && avgProfitNM > 0) {
-    const gainPct = (targetNM - avgProfitNM) / avgProfitNM * 100;
-    gainEl.textContent  = (gainPct > 0 ? '+' : '') + gainPct.toFixed(0) + '%';
-    gainEl.style.color  = gainPct > 0 ? 'var(--green)' : 'var(--red)';
-    hintEl.style.display = 'block';
-    hintEl.textContent  = gainPct > 0
-      ? `Your target ship earns ${gainPct.toFixed(0)}% more per NM than your current average.`
-      : `Your current ship is already competitive with your target.`;
-  } else {
-    gainEl.textContent = '—';
-    gainEl.style.color = '';
-    hintEl.style.display = nmRuns.length === 0 ? 'block' : 'none';
-    hintEl.textContent = nmRuns.length === 0 ? 'Log odometer readings to see $/NM efficiency.' : '';
-  }
 
   // Prediction
   // "Trips after selling" = if you sold NOW, how many more trips to target price
@@ -1004,6 +1011,7 @@ function render() {
   }
 
   drawChart(tripsToSell, avgNet, sellPoint, targetPrice);
+  renderEfficiency();
 }
 
 // ── CHART (canvas) ─────────────────────────────────────────────────────────
@@ -1529,6 +1537,190 @@ function loadFromURL() {
   } catch {}
 }
 
+// ── EFFICIENCY TAB ─────────────────────────────────────────────────────────
+function renderEfficiency() {
+  if (runs.length === 0) return;
+  const completed = runs.slice(1);
+  const hasRuns = completed.length > 0;
+  document.getElementById('eff2-empty').style.display   = hasRuns ? 'none'  : 'block';
+  document.getElementById('eff2-content').style.display = hasRuns ? 'block' : 'none';
+  if (!hasRuns) return;
+
+  const nmRuns    = completed.filter(r => r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0);
+  const timedRuns = completed.filter(r => r.duration && r.duration > 0);
+
+  const nmData  = nmRuns.map(r => ({ run: r.run, nm: r.odoEnd - r.odoStart, perNM: r.net / (r.odoEnd - r.odoStart) }));
+  const minData = timedRuns.map(r => ({ run: r.run, perMin: r.net / r.duration }));
+
+  const avgNM   = nmData.length  ? nmData.reduce((a, d) => a + d.perNM, 0) / nmData.length  : 0;
+  const bestNM  = nmData.length  ? Math.max(...nmData.map(d => d.perNM))                    : 0;
+  const avgMin  = minData.length ? minData.reduce((a, d) => a + d.perMin, 0) / minData.length : 0;
+  const bestMin = minData.length ? Math.max(...minData.map(d => d.perMin))                   : 0;
+  const totalNM  = nmRuns.reduce((a, r) => a + (r.odoEnd - r.odoStart), 0);
+  const totalMin = timedRuns.reduce((a, r) => a + r.duration, 0);
+
+  document.getElementById('eff2-avg-nm').textContent   = avgNM  > 0 ? fmtf(avgNM)  + '/NM'  : '—';
+  document.getElementById('eff2-best-nm').textContent  = bestNM > 0 ? fmtf(bestNM) + '/NM'  : '—';
+  document.getElementById('eff2-avg-min').textContent  = avgMin  > 0 ? fmtf(avgMin)  + '/min' : '—';
+  document.getElementById('eff2-best-min').textContent = bestMin > 0 ? fmtf(bestMin) + '/min' : '—';
+  document.getElementById('eff2-total-nm').textContent   = totalNM  > 0 ? Math.round(totalNM).toLocaleString() + ' NM' : '—';
+  document.getElementById('eff2-total-time').textContent = totalMin > 0 ? (totalMin >= 60 ? (totalMin / 60).toFixed(1) + ' hrs' : totalMin + ' min') : '—';
+
+  const adv = settings.profitNM;
+  const tgt = settings.targetProfitNM;
+  document.getElementById('eff2-advertised-nm').textContent = adv > 0 ? fmtf(adv) + '/NM' : '—';
+  document.getElementById('eff2-actual-nm').textContent     = avgNM  > 0 ? fmtf(avgNM)  + '/NM' : '—';
+  document.getElementById('eff2-target-nm').textContent     = tgt > 0 ? fmtf(tgt) + '/NM' : '—';
+
+  const vsAdvEl = document.getElementById('eff2-vs-adv');
+  if (adv > 0 && avgNM > 0) {
+    const vsAdv = (avgNM - adv) / adv * 100;
+    vsAdvEl.textContent = (vsAdv >= 0 ? '+' : '') + vsAdv.toFixed(1) + '%';
+    vsAdvEl.style.color = vsAdv >= 0 ? 'var(--green)' : 'var(--red)';
+  } else { vsAdvEl.textContent = '—'; vsAdvEl.style.color = ''; }
+
+  const gainEl = document.getElementById('eff2-gain');
+  if (tgt > 0 && avgNM > 0) {
+    const gain = (tgt - avgNM) / avgNM * 100;
+    gainEl.textContent = (gain >= 0 ? '+' : '') + gain.toFixed(1) + '% earnings boost on upgrade';
+    gainEl.style.color = gain > 0 ? 'var(--green)' : 'var(--red)';
+  } else { gainEl.textContent = '—'; gainEl.style.color = ''; }
+
+  document.getElementById('eff2-table-label').textContent = `PER-RUN EFFICIENCY \u00B7 ${completed.length} runs`;
+  const tbody = document.getElementById('eff2-tbody');
+  tbody.innerHTML = completed.map(r => {
+    const nm     = (r.odoEnd && r.odoStart && r.odoEnd - r.odoStart > 0) ? r.odoEnd - r.odoStart : null;
+    const perNM  = nm !== null ? r.net / nm : null;
+    const perMin = (r.duration && r.duration > 0) ? r.net / r.duration : null;
+    const vsAvg  = (perNM !== null && avgNM > 0) ? (perNM - avgNM) / avgNM * 100 : null;
+    return `<tr>
+      <td class="left" style="color:var(--cyan)">${r.run}</td>
+      <td class="right" style="color:#f9a825">${nm !== null ? Math.round(nm).toLocaleString() + ' NM' : '\u2014'}</td>
+      <td class="right" style="color:var(--cyan)">${perNM !== null ? fmtf(perNM) : '\u2014'}</td>
+      <td class="right" style="color:var(--green)">${perMin !== null ? fmtf(perMin) : '\u2014'}</td>
+      <td class="right" style="color:${vsAvg !== null ? (vsAvg >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)'}">${vsAvg !== null ? (vsAvg >= 0 ? '+' : '') + vsAvg.toFixed(1) + '%' : '\u2014'}</td>
+    </tr>`;
+  }).join('');
+
+  if (nmData.length > 0 || minData.length > 0) {
+    document.getElementById('eff2-totals-row').style.display = 'grid';
+    document.getElementById('eff2-tot-nm-row').textContent   = totalNM  > 0 ? Math.round(totalNM).toLocaleString() + ' NM' : '—';
+    document.getElementById('eff2-tot-avg-nm').textContent   = avgNM  > 0 ? fmtf(avgNM)  + '/NM'  : '—';
+    document.getElementById('eff2-tot-avg-min').textContent  = avgMin  > 0 ? fmtf(avgMin)  + '/min' : '—';
+  }
+
+  drawEfficiencyChart(nmData);
+}
+
+function drawEfficiencyChart(nmData) {
+  const isLight = document.body.classList.contains('light');
+  const container = document.getElementById('eff2-chart-container');
+  let canvas = container.querySelector('canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.style.width = '100%'; canvas.style.height = '100%';
+    container.appendChild(canvas);
+  }
+  canvas.width  = container.clientWidth  || 600;
+  canvas.height = container.clientHeight || 220;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const clrLabel = isLight ? '#4a6a84' : '#6a8fa8';
+  if (nmData.length < 2) {
+    ctx.fillStyle = clrLabel; ctx.font = '11px JetBrains Mono, monospace'; ctx.textAlign = 'center';
+    ctx.fillText('Log odometer readings on 2+ runs to see $/NM trend', W / 2, H / 2);
+    return;
+  }
+
+  const clrGrid = isLight ? '#d0dce8' : '#0c1c2c';
+  const clrNM   = isLight ? '#0277bd' : '#4fc3f7';
+  const clrAdv  = isLight ? '#bf5e00' : '#ffa726';
+  const clrTgt  = isLight ? '#6a1b9a' : '#ab47bc';
+  const adv = settings.profitNM;
+  const tgt = settings.targetProfitNM;
+
+  const allVals = [...nmData.map(d => d.perNM), adv > 0 ? adv : 0, tgt > 0 ? tgt : 0].filter(v => v > 0);
+  const dataMin = Math.min(...nmData.map(d => d.perNM));
+  const dataMax = Math.max(...allVals);
+  const pad = (dataMax - dataMin) * 0.18 || dataMax * 0.12 || 1;
+  const minVal = Math.max(0, dataMin - pad);
+  const maxVal = dataMax + pad;
+  const range  = maxVal - minVal || 1;
+
+  const totalX = nmData.length - 1 || 1;
+  const PAD = { l: 72, r: 16, t: 14, b: 28 };
+  const gW = W - PAD.l - PAD.r;
+  const gH = H - PAD.t - PAD.b;
+  const xOf = i => PAD.l + (i / totalX) * gW;
+  const yOf = v => PAD.t + gH - ((v - minVal) / range) * gH;
+
+  // Grid
+  ctx.strokeStyle = clrGrid; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = PAD.t + (i / 4) * gH;
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
+    const val = maxVal - (i / 4) * range;
+    ctx.fillStyle = clrLabel; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'right';
+    ctx.fillText('$' + (val >= 1e6 ? (val / 1e6).toFixed(1) + 'M' : (val / 1000).toFixed(0) + 'k'), PAD.l - 4, y + 3);
+  }
+
+  // Reference lines
+  const drawRef = (val, color, label) => {
+    if (!(val > 0)) return;
+    const y = yOf(val);
+    if (y < PAD.t - 2 || y > PAD.t + gH + 2) return;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
+    ctx.fillStyle = color; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'left';
+    ctx.fillText(label, PAD.l + 3, y - 3);
+    ctx.restore();
+  };
+  drawRef(adv, clrAdv, 'ADVERTISED');
+  drawRef(tgt, clrTgt, 'TARGET');
+
+  // Area fill under line
+  ctx.save();
+  const grad = ctx.createLinearGradient(0, PAD.t, 0, PAD.t + gH);
+  grad.addColorStop(0, clrNM + '33'); grad.addColorStop(1, clrNM + '00');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), PAD.t + gH);
+  nmData.forEach((d, i) => ctx.lineTo(xOf(i), yOf(d.perNM)));
+  ctx.lineTo(xOf(nmData.length - 1), PAD.t + gH);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+
+  // Avg line
+  const avgNM = nmData.reduce((a, d) => a + d.perNM, 0) / nmData.length;
+  const avgY  = yOf(avgNM);
+  if (avgY >= PAD.t && avgY <= PAD.t + gH) {
+    ctx.save();
+    ctx.strokeStyle = clrNM + '55'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(PAD.l, avgY); ctx.lineTo(W - PAD.r, avgY); ctx.stroke();
+    ctx.fillStyle = clrNM + 'aa'; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'right';
+    ctx.fillText('AVG', W - PAD.r - 2, avgY - 3);
+    ctx.restore();
+  }
+
+  // $/NM line + dots
+  ctx.save();
+  ctx.strokeStyle = clrNM; ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.beginPath();
+  nmData.forEach((d, i) => i === 0 ? ctx.moveTo(xOf(i), yOf(d.perNM)) : ctx.lineTo(xOf(i), yOf(d.perNM)));
+  ctx.stroke();
+  nmData.forEach((d, i) => {
+    ctx.beginPath(); ctx.arc(xOf(i), yOf(d.perNM), 3, 0, Math.PI * 2);
+    ctx.fillStyle = clrNM; ctx.fill();
+  });
+  ctx.restore();
+
+  // X labels
+  ctx.fillStyle = clrLabel; ctx.font = '8px JetBrains Mono,monospace'; ctx.textAlign = 'center';
+  nmData.forEach((d, i) => ctx.fillText(d.run.replace('Run ', 'R'), xOf(i), H - PAD.b + 12));
+}
+
 // ── TABS ───────────────────────────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
@@ -1539,11 +1731,14 @@ function switchTab(name) {
       el.classList.add('active');
   });
   if (name === 'dashboard' && runs.length > 0) {
-    const { avgNet, avgDur } = stats();
+    const { avgNet } = stats();
     drawChart(
       avgNet > 0 ? Math.ceil(Math.max(0, settings.sellPoint - runs[runs.length - 1].balance) / avgNet) : 0,
       avgNet, settings.sellPoint, settings.targetPrice
     );
+  }
+  if (name === 'efficiency' && runs.length > 0) {
+    renderEfficiency();
   }
 }
 
