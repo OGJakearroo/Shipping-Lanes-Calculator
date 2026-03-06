@@ -735,7 +735,7 @@
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
-const BUILD_DATE   = '2026-03-06 13:52';
+const BUILD_DATE   = '2026-03-06 14:00';
 const STORAGE_KEY  = 'shipping-grind-v2';
 const SETTINGS_KEY = 'shipping-grind-settings-v2';
 const THEME_KEY    = 'shipping-grind-theme';
@@ -1540,6 +1540,8 @@ function loadFromURL() {
       if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
     }
   } catch {}
+  // Remove ?data= from the URL so refreshing doesn't overwrite localStorage again
+  history.replaceState(null, '', location.pathname);
 }
 
 // ── LOG FORM PERSISTENCE ───────────────────────────────────────────────────
