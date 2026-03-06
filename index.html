@@ -735,7 +735,7 @@
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
-const BUILD_DATE   = '2026-03-05';
+const BUILD_DATE   = '2026-03-06 13:52';
 const STORAGE_KEY  = 'shipping-grind-v2';
 const SETTINGS_KEY = 'shipping-grind-settings-v2';
 const THEME_KEY    = 'shipping-grind-theme';
@@ -1561,14 +1561,15 @@ function loadLogForm() {
     const raw = localStorage.getItem(LOG_FORM_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
-    if (d.balance)  document.getElementById('inp-balance').value   = d.balance;
-    if (d.fuel)     document.getElementById('inp-fuel').value      = d.fuel;
-    if (d.odoStart) document.getElementById('inp-odo-start').value = d.odoStart;
-    if (d.odoEnd)   document.getElementById('inp-odo-end').value   = d.odoEnd;
-    if (d.start)    document.getElementById('inp-start').value     = d.start;
-    if (d.end)      document.getElementById('inp-end').value       = d.end;
-    updatePreview();
-    updateDurPreview();
+    const set = (id, val) => { if (val != null && val !== '') { const el = document.getElementById(id); el.value = val; formatInput(el); } };
+    set('inp-balance',   d.balance);
+    set('inp-fuel',      d.fuel);
+    set('inp-odo-start', d.odoStart);
+    set('inp-odo-end',   d.odoEnd);
+    // time inputs don't need formatting
+    if (d.start) document.getElementById('inp-start').value = d.start;
+    if (d.end)   document.getElementById('inp-end').value   = d.end;
+    if (runs.length > 0) { updatePreview(); updateDurPreview(); }
   } catch {}
 }
 
@@ -1796,7 +1797,10 @@ if (runs.length === 0) {
 loadLogForm();
 
 ['inp-balance','inp-fuel','inp-odo-start','inp-odo-end','inp-start','inp-end'].forEach(id => {
-  document.getElementById(id).addEventListener('input', saveLogForm);
+  const el = document.getElementById(id);
+  el.addEventListener('input',  saveLogForm);
+  el.addEventListener('change', saveLogForm);
+  el.addEventListener('blur',   saveLogForm);
 });
 
 window.addEventListener('resize', () => { if (runs.length > 0) render(); });
