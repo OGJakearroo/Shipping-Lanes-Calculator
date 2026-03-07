@@ -1,2 +1,1 @@
-# SPA-style: serve index.html for all paths (handles share URLs with query params)
-/*  /index.html  200
+# No redirects needed - static site with index.html as entry point
