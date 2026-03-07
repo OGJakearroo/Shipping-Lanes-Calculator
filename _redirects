@@ -1,0 +1,2 @@
+# SPA-style: serve index.html for all paths (handles share URLs with query params)
+/*  /index.html  200
