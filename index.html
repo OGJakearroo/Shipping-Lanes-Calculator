@@ -3,272 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Track your Roblox Shipping Lanes progress, predict ship upgrades, calculate routes, and optimize your earnings.">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <title>Shipping Lanes Tracker</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #060d18;
-    --bg2: #0a1525;
-    --bg3: #040b14;
-    --border: #132535;
-    --border2: #1e4060;
-    --cyan: #4fc3f7;
-    --cyan-dim: #4fc3f733;
-    --blue: #0288d1;
-    --green: #66bb6a;
-    --orange: #ffa726;
-    --red: #ef5350;
-    --purple: #ab47bc;
-    --muted: #6a8fa8;
-    --text: #bdd4e4;
-    --input-bg: #07111e;
-    --input-border: #1a3a5c;
-    --mono: 'JetBrains Mono', 'Courier New', monospace;
-    --head: 'Inter', sans-serif;
-    --body: 'Inter', sans-serif;
-  }
-
-  body.light {
-    --bg: #f0f5fa;
-    --bg2: #ffffff;
-    --bg3: #e4ecf4;
-    --border: #c8d8e8;
-    --border2: #8aacc8;
-    --cyan: #0277bd;
-    --cyan-dim: #0277bd22;
-    --blue: #0288d1;
-    --green: #2e7d32;
-    --orange: #bf5e00;
-    --red: #c62828;
-    --purple: #6a1b9a;
-    --muted: #4a6a84;
-    --text: #1a3550;
-    --input-bg: #edf3f9;
-    --input-border: #aac0d4;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--body);
-    font-size: 14px;
-    min-height: 100vh;
-    transition: background 0.2s, color 0.2s;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    background: linear-gradient(180deg, #0a1628 0%, var(--bg) 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 24px 18px;
-    transition: background 0.2s;
-  }
-  body.light .header {
-    background: linear-gradient(180deg, #dbeaf6 0%, var(--bg) 100%);
-  }
-  .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .title {
-    font-family: var(--head);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--cyan);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .subtitle { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.2em; margin-top: 4px; font-family: var(--mono); }
-  .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .save-badge { font-size: 0.7rem; color: var(--green); letter-spacing: 0.1em; opacity: 0; transition: opacity 0.3s; font-family: var(--mono); }
-  .save-badge.show { opacity: 1; }
-
-  .progress-wrap { margin-top: 16px; }
-  .progress-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; font-family: var(--mono); }
-  .progress-labels .pct { color: var(--cyan); font-weight: 600; }
-  .progress-bar { height: 7px; background: var(--bg3); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #01579b, var(--cyan)); border-radius: 4px; box-shadow: 0 0 10px #4fc3f766; transition: width 0.6s ease; }
-
-  /* ── BODY ── */
-  .body { padding: 20px 24px; }
-
-  /* ── TABS ── */
-  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-  .tab-btn {
-    padding: 7px 16px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-family: var(--body);
-    transition: all 0.15s;
-  }
-  .tab-btn.active { background: var(--border2); color: var(--cyan); border-color: var(--border2); }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
-
-  /* ── CARDS ── */
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 16px; transition: background 0.2s, border-color 0.2s; }
-  .card-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; font-family: var(--mono); }
-  .stat-val { font-size: 1.2rem; font-weight: 700; font-family: var(--mono); }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* ── INPUTS ── */
-  .field { margin-bottom: 16px; }
-  .field-label { font-size: 0.75rem; font-weight: 600; color: var(--text); letter-spacing: 0.05em; margin-bottom: 4px; }
-  .field-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
-  .chart-toggle { --tog-color: var(--cyan); background: none; border: 1px solid var(--tog-color); border-radius: 12px; color: var(--tog-color); font-size: 0.65rem; font-family: var(--mono); letter-spacing: 0.05em; padding: 3px 10px; cursor: pointer; opacity: 0.45; transition: opacity 0.15s; }
-  .chart-toggle.active { opacity: 1; background: color-mix(in srgb, var(--tog-color) 12%, transparent); }
-  .log-hint-tooltip { display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent); border-radius: 20px; padding: 5px 12px; font-size: 0.72rem; font-family: var(--mono); color: var(--cyan); margin-bottom: 16px; }
-  input[type=text], input[type=number], input[type=time], select, textarea {
-    width: 100%;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 4px;
-    padding: 9px 12px;
-    color: var(--text);
-    font-size: 0.88rem;
-    font-family: var(--mono);
-    outline: none;
-    color-scheme: dark;
-    transition: border-color 0.15s, background 0.2s, color 0.2s;
-  }
-  body.light input[type=text],
-  body.light input[type=number],
-  body.light input[type=time],
-  body.light select,
-  body.light textarea {
-    color-scheme: light;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--cyan); }
-  input[readonly] { opacity: 0.6; cursor: default; border-style: dashed; }
-  input[readonly]:focus { border-color: var(--input-border); }
-  .grid-2-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .duration-hint { margin-top: 8px; font-size: 0.78rem; color: var(--purple); font-family: var(--mono); }
-  .duration-hint span { color: var(--muted); font-size: 0.7rem; }
-
-  /* ── BUTTONS ── */
-  .btn {
-    border: none;
-    border-radius: 4px;
-    padding: 9px 18px;
-    font-family: var(--body);
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: opacity 0.15s, filter 0.15s;
-  }
-  .btn:hover { filter: brightness(1.1); }
-  .btn-primary { background: var(--blue); color: #fff; }
-  .btn-danger  { background: transparent; border: 1px solid var(--red); color: var(--red); }
-  .btn-muted   { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
-  .btn-green   { background: transparent; border: 1px solid var(--green); color: var(--green); }
-  .btn-full    { width: 100%; padding: 12px; margin-top: 16px; }
-  .btn-icon    { font-size: 1rem; padding: 6px 10px; line-height: 1; }
-
-  /* ── PREVIEW ── */
-  .preview { margin-top: 14px; padding: 12px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
-  .preview-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 8px; font-family: var(--mono); }
-  .preview-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.82rem; font-family: var(--mono); }
-
-  /* ── PREDICTION ── */
-  .prediction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
-  .pred-label { color: var(--muted); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 4px; text-transform: uppercase; font-family: var(--mono); }
-  .pred-val { font-size: 1rem; font-weight: 700; font-family: var(--mono); }
-  .prediction-footer { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-
-  /* ── TABLE ── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-family: var(--mono); }
-  thead tr { font-size: 0.7rem; letter-spacing: 0.1em; }
-  th { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 600; }
-  th.left, td.left { text-align: left; }
-  th.right, td.right { text-align: right; }
-  td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-  .totals-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.78rem; font-family: var(--mono); }
-
-  /* ── CHART ── */
-  #chart-container { width: 100%; height: 250px; }
-
-  /* ── ERROR ── */
-  .error { color: var(--red); font-size: 0.78rem; margin-top: 8px; font-family: var(--mono); }
-
-  /* ── SETTINGS ── */
-  .settings-section { margin-bottom: 20px; }
-  .settings-title { font-family: var(--head); font-size: 1rem; font-weight: 700; color: var(--cyan); margin-bottom: 14px; letter-spacing: 0.05em; }
-  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  /* ── EXPORT ── */
-  .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .export-desc { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
-
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-  }
-  .empty-state-title { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-  .empty-state-desc { font-size: 0.82rem; line-height: 1.6; }
-
-  /* ── MODAL ── */
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-  }
-  .modal-backdrop.hidden { display: none; }
-  .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 28px;
-    max-width: 420px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-  .modal-title {
-    font-family: var(--head);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--cyan);
-    margin-bottom: 6px;
-  }
-  .modal-subtitle {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 20px;
-    line-height: 1.5;
-  }
-  .modal-footer { margin-top: 20px; }
-  .onboard-steps { display: flex; gap: 6px; margin-bottom: 20px; }
-  .onboard-step { height: 3px; flex: 1; border-radius: 2px; background: var(--border2); transition: background 0.3s; }
-  .onboard-step.active { background: var(--cyan); }
-  .onboard-step.done { background: var(--green); }
-  .onboard-pane { display: none; }
-  .onboard-pane.visible { display: block; }
-  .wiki-link { font-size: 0.7rem; color: var(--cyan); text-decoration: none; opacity: 0.8; }
-  .wiki-link:hover { opacity: 1; text-decoration: underline; }
-  .onboard-skip { background: none; border: none; color: var(--muted); font-size: 0.72rem; cursor: pointer; padding: 0; text-decoration: underline; }
-  .onboard-skip:hover { color: var(--text); }
-  .modal-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; gap: 10px; }
-
-  @media (max-width: 480px) {
-    .grid-2, .grid-4, .settings-grid, .export-grid, .grid-2-input, .preview-grid, .totals-row { grid-template-columns: 1fr; }
-    .header-top { flex-direction: column; }
-  }
-</style>
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -300,20 +39,20 @@
     <!-- Step 2: Current ship -->
     <div class="onboard-pane" id="ob-pane-1">
       <div class="modal-title">Your Current Ship</div>
-      <div class="modal-subtitle">This helps calculate how much you'll earn from selling it when you upgrade. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="modal-subtitle">Select your ship to auto-fill stats, or type a custom name. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank" rel="noopener">View ships on the wiki &rarr;</a></div>
       <div class="field">
         <div class="field-label">Ship Name</div>
-        <div class="field-hint">e.g. Handysize, Capesize, VLCC</div>
-        <input type="text" id="ob-current-ship" placeholder="e.g. Capesize">
+        <div class="field-hint">Start typing to search all ships, or enter a custom name</div>
+        <input type="text" id="ob-current-ship" placeholder="e.g. Capesize" autocomplete="off">
       </div>
       <div class="field">
         <div class="field-label">Resale Value ($)</div>
-        <div class="field-hint">What your current ship sells for — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a> for values</div>
-        <input type="text" id="ob-current-sale" placeholder="e.g. 28,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
+        <div class="field-hint">Auto-filled at 30% of purchase price when you select a ship</div>
+        <input type="text" id="ob-current-sale" placeholder="e.g. 13,800,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
       </div>
       <div class="field">
         <div class="field-label">Profit per NM ($/NM) &mdash; optional</div>
-        <div class="field-hint">Your ship's advertised earnings per nautical mile — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a></div>
+        <div class="field-hint">Auto-filled when you select a ship from the database</div>
         <input type="text" id="ob-current-profit-nm" placeholder="e.g. 340,000" onblur="formatInput(this)">
       </div>
       <div class="modal-nav">
@@ -328,20 +67,20 @@
     <!-- Step 3: Target ship -->
     <div class="onboard-pane" id="ob-pane-2">
       <div class="modal-title">Your Target Ship</div>
-      <div class="modal-subtitle">The ship you're saving toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">View ships on the wiki &rarr;</a></div>
+      <div class="modal-subtitle">The ship you're saving toward. We'll calculate your sell point automatically. <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank" rel="noopener">View ships on the wiki &rarr;</a></div>
       <div class="field">
         <div class="field-label">Target Ship Name</div>
-        <div class="field-hint">e.g. VLCC, Ore Carrier</div>
-        <input type="text" id="ob-target-ship" placeholder="e.g. VLCC">
+        <div class="field-hint">Start typing to search, or check the Upgrade tab later</div>
+        <input type="text" id="ob-target-ship" placeholder="e.g. VLCC" autocomplete="off">
       </div>
       <div class="field">
         <div class="field-label">Target Ship Price ($)</div>
-        <div class="field-hint">The purchase price of the ship you want — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ships wiki page</a></div>
+        <div class="field-hint">Auto-filled when you select a ship from the database</div>
         <input type="text" id="ob-target-price" placeholder="e.g. 150,000,000" onblur="formatInput(this)" oninput="obUpdateSellPoint()">
       </div>
       <div class="field">
         <div class="field-label">Target Ship Profit/NM &mdash; optional</div>
-        <div class="field-hint">The target ship's earnings per nautical mile — check the <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a></div>
+        <div class="field-hint">Auto-filled when you select a ship from the database</div>
         <input type="text" id="ob-target-profit-nm" placeholder="e.g. 787,500" onblur="formatInput(this)">
       </div>
       <div class="field" id="ob-sellpoint-field" style="display:none">
@@ -363,7 +102,7 @@
 <div class="header">
   <div class="header-top">
     <div>
-      <div class="title">&#9875; <span id="hdr-current-ship">—</span> &rarr; <span id="hdr-target-ship">—</span></div>
+      <div class="title">&#9875; <span id="hdr-current-ship">&mdash;</span> &rarr; <span id="hdr-target-ship">&mdash;</span></div>
       <div class="subtitle">ROBLOX SHIPPING LANES &middot; PROGRESS TRACKER &middot; <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;opacity:0.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">WIKI &#8599;</a></div>
     </div>
     <div class="header-actions">
@@ -376,7 +115,7 @@
     <div class="progress-labels">
       <span id="prog-current">$0M current</span>
       <span class="pct" id="prog-pct">0%</span>
-      <span id="prog-target">— sell point</span>
+      <span id="prog-target">&mdash; sell point</span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
@@ -384,12 +123,14 @@
 
 <div class="body">
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
-    <button class="tab-btn" onclick="switchTab('efficiency')">EFFICIENCY</button>
-    <button class="tab-btn" onclick="switchTab('log')">LOG RUN</button>
-    <button class="tab-btn" onclick="switchTab('history')">HISTORY</button>
-    <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
-    <button class="tab-btn" onclick="switchTab('export')">EXPORT / IMPORT</button>
+    <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">DASHBOARD</button>
+    <button class="tab-btn" data-tab="efficiency" onclick="switchTab('efficiency')">EFFICIENCY</button>
+    <button class="tab-btn" data-tab="log" onclick="switchTab('log')">LOG RUN</button>
+    <button class="tab-btn" data-tab="routes" onclick="switchTab('routes')">ROUTES</button>
+    <button class="tab-btn" data-tab="upgrade" onclick="switchTab('upgrade')">UPGRADE</button>
+    <button class="tab-btn" data-tab="history" onclick="switchTab('history')">HISTORY</button>
+    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">SETTINGS</button>
+    <button class="tab-btn" data-tab="export" onclick="switchTab('export')">EXPORT</button>
   </div>
 
   <!-- DASHBOARD -->
@@ -412,7 +153,7 @@
         </div>
         <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
           <div class="card-label">Avg Income / hr</div>
-          <div class="stat-val" style="color:var(--green)" id="stat-income-hr">—</div>
+          <div class="stat-val" style="color:var(--green)" id="stat-income-hr">&mdash;</div>
         </div>
         <div class="card" style="border-color:#ab47bc22;margin-bottom:0">
           <div class="card-label">Est. Time Remaining</div>
@@ -423,14 +164,14 @@
       <div class="card">
         <div class="card-label" id="pred-label">SMART PREDICTION</div>
         <div class="prediction-grid">
-          <div><div class="pred-label">AVG NET / TRIP</div><div class="pred-val" style="color:var(--green)" id="pred-avg-net">—</div></div>
-          <div><div class="pred-label">AVG TRIP DURATION</div><div class="pred-val" style="color:var(--green)" id="pred-avg-dur">—</div></div>
-          <div><div class="pred-label">SELL <span id="pred-current-ship">CURRENT SHIP</span> FOR</div><div class="pred-val" style="color:var(--orange)" id="pred-sale-val">—</div></div>
-          <div><div class="pred-label">TRIPS AFTER SELLING</div><div class="pred-val" style="color:var(--cyan)" id="pred-after-trips">—</div></div>
+          <div><div class="pred-label">AVG NET / TRIP</div><div class="pred-val" style="color:var(--green)" id="pred-avg-net">&mdash;</div></div>
+          <div><div class="pred-label">AVG TRIP DURATION</div><div class="pred-val" style="color:var(--green)" id="pred-avg-dur">&mdash;</div></div>
+          <div><div class="pred-label">SELL <span id="pred-current-ship">CURRENT SHIP</span> FOR</div><div class="pred-val" style="color:var(--orange)" id="pred-sale-val">&mdash;</div></div>
+          <div><div class="pred-label">TRIPS AFTER SELLING</div><div class="pred-val" style="color:var(--cyan)" id="pred-after-trips">&mdash;</div></div>
         </div>
         <div class="prediction-footer">
           <div class="pred-label">TOTAL TO <span id="pred-target-ship-label">TARGET SHIP</span></div>
-          <div style="color:var(--cyan);font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="pred-total">—</div>
+          <div style="color:var(--cyan);font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="pred-total">&mdash;</div>
         </div>
       </div>
 
@@ -460,27 +201,27 @@
       <div class="grid-2">
         <div class="card" style="border-color:var(--cyan-dim);margin-bottom:0">
           <div class="card-label">Avg $/NM</div>
-          <div class="stat-val" style="color:var(--cyan)" id="eff2-avg-nm">—</div>
+          <div class="stat-val" style="color:var(--cyan)" id="eff2-avg-nm">&mdash;</div>
         </div>
         <div class="card" style="border-color:var(--cyan-dim);margin-bottom:0">
           <div class="card-label">Best $/NM</div>
-          <div class="stat-val" style="color:var(--cyan)" id="eff2-best-nm">—</div>
+          <div class="stat-val" style="color:var(--cyan)" id="eff2-best-nm">&mdash;</div>
         </div>
         <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
           <div class="card-label">Avg $/min</div>
-          <div class="stat-val" style="color:var(--green)" id="eff2-avg-min">—</div>
+          <div class="stat-val" style="color:var(--green)" id="eff2-avg-min">&mdash;</div>
         </div>
         <div class="card" style="border-color:#66bb6a22;margin-bottom:0">
           <div class="card-label">Best $/min</div>
-          <div class="stat-val" style="color:var(--green)" id="eff2-best-min">—</div>
+          <div class="stat-val" style="color:var(--green)" id="eff2-best-min">&mdash;</div>
         </div>
         <div class="card" style="border-color:#f9a82522;margin-bottom:0">
           <div class="card-label">Total NM Sailed</div>
-          <div class="stat-val" style="color:#f9a825" id="eff2-total-nm">—</div>
+          <div class="stat-val" style="color:#f9a825" id="eff2-total-nm">&mdash;</div>
         </div>
         <div class="card" style="border-color:#ab47bc22;margin-bottom:0">
           <div class="card-label">Total Time Logged</div>
-          <div class="stat-val" style="color:var(--purple)" id="eff2-total-time">—</div>
+          <div class="stat-val" style="color:var(--purple)" id="eff2-total-time">&mdash;</div>
         </div>
       </div>
 
@@ -492,14 +233,14 @@
       <div class="card">
         <div class="card-label">SHIP EFFICIENCY COMPARISON</div>
         <div class="prediction-grid">
-          <div><div class="pred-label">ADVERTISED $/NM</div><div class="pred-val" style="color:var(--muted)" id="eff2-advertised-nm">—</div></div>
-          <div><div class="pred-label">YOUR ACTUAL $/NM</div><div class="pred-val" style="color:var(--cyan)" id="eff2-actual-nm">—</div></div>
-          <div><div class="pred-label">VS ADVERTISED</div><div class="pred-val" id="eff2-vs-adv">—</div></div>
-          <div><div class="pred-label">TARGET SHIP $/NM</div><div class="pred-val" style="color:var(--purple)" id="eff2-target-nm">—</div></div>
+          <div><div class="pred-label">ADVERTISED $/NM</div><div class="pred-val" style="color:var(--muted)" id="eff2-advertised-nm">&mdash;</div></div>
+          <div><div class="pred-label">YOUR ACTUAL $/NM</div><div class="pred-val" style="color:var(--cyan)" id="eff2-actual-nm">&mdash;</div></div>
+          <div><div class="pred-label">VS ADVERTISED</div><div class="pred-val" id="eff2-vs-adv">&mdash;</div></div>
+          <div><div class="pred-label">TARGET SHIP $/NM</div><div class="pred-val" style="color:var(--purple)" id="eff2-target-nm">&mdash;</div></div>
         </div>
         <div class="prediction-footer">
           <div class="pred-label">UPGRADE EARNINGS BOOST</div>
-          <div style="font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="eff2-gain">—</div>
+          <div style="font-size:1rem;font-weight:700;margin-top:4px;font-family:var(--mono)" id="eff2-gain">&mdash;</div>
         </div>
       </div>
 
@@ -591,6 +332,88 @@
     </div>
   </div>
 
+  <!-- ROUTES -->
+  <div class="tab-pane" id="tab-routes">
+    <div class="card">
+      <div class="card-label">ROUTE CALCULATOR</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:16px;line-height:1.5">
+        Calculate expected profit for a route based on your ship, ports, and distance.
+        Port multipliers are applied automatically based on cargo type.
+        <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ports" target="_blank" rel="noopener">Port info &rarr;</a>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Ship</div>
+        <input type="text" id="route-ship" placeholder="Search ships..." autocomplete="off">
+      </div>
+
+      <div class="grid-2-input">
+        <div class="field">
+          <div class="field-label">Loading Port</div>
+          <select id="route-load">
+            <option value="">Select port...</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label">Unloading Port</div>
+          <select id="route-unload">
+            <option value="">Select port...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Distance (NM) &mdash; optional</div>
+        <div class="field-hint">Straight-line distance between ports for profit estimate</div>
+        <input type="text" id="route-distance" placeholder="e.g. 30" onblur="formatInput(this)">
+      </div>
+    </div>
+
+    <div id="route-result"></div>
+
+    <div class="card">
+      <div class="card-label">PORT MULTIPLIERS</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px;line-height:1.5">
+        <strong>Bulk &amp; Gas:</strong> Multiplier applies at both loading and unloading ports.<br>
+        <strong>Containers &amp; Vehicles:</strong> Multiplier applies at unloading port only.<br>
+        <strong>Oil:</strong> Profit based on market prices, not multipliers.<br>
+        <strong>Heavy:</strong> Fixed per-NM rate, no multiplier.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="left">PORT</th>
+              <th class="right">MULTIPLIER</th>
+              <th class="right">DWT LIMIT</th>
+              <th class="left">REGION</th>
+            </tr>
+          </thead>
+          <tbody id="ports-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPGRADE PATH -->
+  <div class="tab-pane" id="tab-upgrade">
+    <div class="card">
+      <div class="card-label">UPGRADE PATH PLANNER</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:16px;line-height:1.5">
+        Shows available upgrades from your current ship with estimated runs and time to afford each one.
+        Set your current ship in Settings to get personalized results.
+      </div>
+      <div id="upgrade-path-content"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">ARCHIVED SEASONS</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px">When you upgrade ships, archive your current progress to start fresh while keeping lifetime stats.</div>
+      <div id="seasons-list"></div>
+      <button class="btn btn-muted btn-full" onclick="startNewSeason()" style="margin-top:8px">Archive Current &amp; Start New Season</button>
+    </div>
+  </div>
+
   <!-- HISTORY -->
   <div class="tab-pane" id="tab-history">
     <div class="card">
@@ -631,16 +454,16 @@
   <!-- SETTINGS -->
   <div class="tab-pane" id="tab-settings">
     <div class="card settings-section">
-      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Current Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List &rarr;</a></div>
+      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Current Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank" rel="noopener">Ship List &rarr;</a></div>
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Ship Name</div>
-          <div class="field-hint">The name of the ship you're currently sailing</div>
-          <input type="text" id="set-current-ship" placeholder="e.g. Capesize" oninput="saveSettings()">
+          <div class="field-hint">Search ships or type a custom name</div>
+          <input type="text" id="set-current-ship" placeholder="e.g. Capesize" autocomplete="off">
         </div>
         <div class="field">
           <div class="field-label">Resale Value ($)</div>
-          <div class="field-hint">What you'll get when you sell it — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a> for values</div>
+          <div class="field-hint">Auto-filled at 30% of price when selecting a ship</div>
           <input type="text" id="set-current-sale" placeholder="e.g. 13,800,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
@@ -659,16 +482,16 @@
     </div>
 
     <div class="card settings-section">
-      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Target Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List &rarr;</a></div>
+      <div class="settings-title" style="display:flex;align-items:center;justify-content:space-between">Target Ship <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank" rel="noopener">Ship List &rarr;</a></div>
       <div class="settings-grid">
         <div class="field">
           <div class="field-label">Target Ship Name</div>
-          <div class="field-hint">The ship you're saving toward</div>
-          <input type="text" id="set-target-ship" placeholder="e.g. Seamax Ore Carrier" oninput="saveSettings()">
+          <div class="field-hint">Search ships or type a custom name</div>
+          <input type="text" id="set-target-ship" placeholder="e.g. Seamax Ore Carrier" autocomplete="off">
         </div>
         <div class="field">
           <div class="field-label">Target Ship Price ($)</div>
-          <div class="field-hint">Full purchase price — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Ship_List" target="_blank">Ship List</a> for prices</div>
+          <div class="field-hint">Auto-filled when selecting a ship</div>
           <input type="text" id="set-target-price" placeholder="e.g. 245,000,000" oninput="calcSellPoint()" onblur="formatInput(this)">
         </div>
         <div class="field">
@@ -678,8 +501,8 @@
         </div>
         <div class="field">
           <div class="field-label">Cargo Type</div>
-          <div class="field-hint">Type of cargo this ship carries — see <a class="wiki-link" href="https://roblox-shipping-lanes.fandom.com/wiki/Cargo_Types" target="_blank">Cargo wiki page</a></div>
-          <input type="text" id="set-cargo" placeholder="e.g. Bulk, Ore, Gas, Containers" oninput="saveSettings()">
+          <div class="field-hint">Auto-filled when selecting a ship</div>
+          <input type="text" id="set-cargo" placeholder="e.g. Bulk, Container, Gas" oninput="saveSettings()">
         </div>
       </div>
     </div>
@@ -707,7 +530,7 @@
       <div class="export-grid">
         <div>
           <button class="btn btn-green" style="width:100%" onclick="exportJSON()">&#11015; Export JSON</button>
-          <div class="export-desc">Full backup &mdash; runs + settings. Re-importable.</div>
+          <div class="export-desc">Full backup &mdash; runs + settings + seasons. Re-importable.</div>
         </div>
         <div>
           <button class="btn btn-green" style="width:100%" onclick="exportCSV()">&#11015; Export CSV</button>
@@ -733,1089 +556,39 @@
   </div>
 </div>
 
+<!-- Scripts loaded in order: data first, then state, then UI/charts/render, then init -->
+<script src="data/ships.js"></script>
+<script src="data/ports.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/render.js"></script>
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
-const BUILD_DATE   = '2026-03-06 14:00';
-const STORAGE_KEY  = 'shipping-grind-v2';
-const SETTINGS_KEY = 'shipping-grind-settings-v2';
-const THEME_KEY    = 'shipping-grind-theme';
-const LOG_FORM_KEY = 'shipping-log-form-v1';
-
-const DEFAULT_SETTINGS = {
-  currentShip: '',
-  currentSale: 0,
-  sellPoint: 0,
-  profitNM: 0,
-  targetShip: '',
-  targetPrice: 0,
-  targetProfitNM: 0,
-  cargo: '',
-  startBalance: 0,
-};
-
-let runs = [];
-let settings = { ...DEFAULT_SETTINGS };
-
-function load() {
-  try {
-    const sr = localStorage.getItem(STORAGE_KEY);
-    runs = sr ? JSON.parse(sr) : [];
-  } catch { runs = []; }
-  try {
-    const ss = localStorage.getItem(SETTINGS_KEY);
-    if (ss) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(ss) };
-  } catch {}
-}
-
-function save() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(runs));
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    const b = document.getElementById('save-badge');
-    b.classList.add('show');
-    setTimeout(() => b.classList.remove('show'), 1500);
-  } catch {}
-}
-
-// ── THEME ──────────────────────────────────────────────────────────────────
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
-  document.getElementById('theme-btn').textContent = isLight ? '\u263D' : '\u2600';
-  if (runs.length > 0) render();
-}
-
-function loadTheme() {
-  const t = localStorage.getItem(THEME_KEY);
-  if (t === 'light') {
-    document.body.classList.add('light');
-    document.getElementById('theme-btn').textContent = '\u263D';
-  }
-}
-
-// ── ONBOARDING MODAL ───────────────────────────────────────────────────────
-function showStartBalanceModal() {
-  obGoto(0);
-  ['modal-balance','ob-current-ship','ob-current-sale','ob-current-profit-nm','ob-target-ship','ob-target-price','ob-target-profit-nm','ob-sell-point'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
+// Populate port dropdowns
+(function() {
+  var cargoPorts = PORT_DATABASE.filter(function(p) { return p.multiplier > 0; });
+  var optionsHTML = '<option value="">Select port...</option>';
+  cargoPorts.forEach(function(p) {
+    var label = p.name + (p.multiplier !== 1 ? ' (' + p.multiplier + 'x)' : '');
+    if (p.dwtLimit) label += ' [DWT<=' + (p.dwtLimit/1000) + 'k]';
+    optionsHTML += '<option value="' + p.name + '">' + label + '</option>';
   });
-  document.getElementById('ob-sellpoint-field').style.display = 'none';
-  document.getElementById('modal-error').style.display = 'none';
-  document.getElementById('modal-backdrop').classList.remove('hidden');
-  setTimeout(() => document.getElementById('modal-balance').focus(), 100);
-}
-
-function obGoto(step) {
-  [0,1,2].forEach(i => {
-    document.getElementById(`ob-pane-${i}`).classList.toggle('visible', i === step);
-    const dot = document.getElementById(`ob-dot-${i}`);
-    dot.classList.toggle('active', i === step);
-    dot.classList.toggle('done', i < step);
-  });
-}
-
-function obNext(step) {
-  if (step === 0) {
-    const errEl = document.getElementById('modal-error');
-    const val = pn(document.getElementById('modal-balance').value);
-    if (isNaN(val) || val <= 0) {
-      errEl.textContent = 'Please enter your current in-game balance.';
-      errEl.style.display = 'block';
-      return;
-    }
-    errEl.style.display = 'none';
-  }
-  obGoto(step + 1);
-  setTimeout(() => {
-    const focusIds = ['ob-current-ship', 'ob-target-ship'];
-    const el = document.getElementById(focusIds[step]);
-    if (el) el.focus();
-  }, 50);
-}
-
-function obBack(step) { obGoto(step - 1); }
-
-function obSkip(step) {
-  if (step >= 2) { obFinish(); } else { obGoto(step + 1); }
-}
-
-function obUpdateSellPoint() {
-  const sale  = pn(document.getElementById('ob-current-sale').value);
-  const price = pn(document.getElementById('ob-target-price').value);
-  const field = document.getElementById('ob-sellpoint-field');
-  if (!isNaN(price) && price > 0) {
-    const sp = Math.max(0, price - (isNaN(sale) ? 0 : sale));
-    document.getElementById('ob-sell-point').value = Math.round(sp).toLocaleString();
-    field.style.display = 'block';
-  } else {
-    field.style.display = 'none';
-  }
-}
-
-function obFinish() {
-  const val              = pn(document.getElementById('modal-balance').value);
-  const currentShip      = document.getElementById('ob-current-ship').value.trim();
-  const currentSale      = pn(document.getElementById('ob-current-sale').value);
-  const currentProfitNM  = pn(document.getElementById('ob-current-profit-nm').value);
-  const targetShip       = document.getElementById('ob-target-ship').value.trim();
-  const targetPrice      = pn(document.getElementById('ob-target-price').value);
-  const targetProfitNM   = pn(document.getElementById('ob-target-profit-nm').value);
-
-  runs = [{
-    id: Date.now(),
-    run: 'Start',
-    balance: val,
-    fuel: 0,
-    gross: 0,
-    net: 0,
-    duration: null,
-    timestamp: new Date().toISOString()
-  }];
-  settings.startBalance = val;
-  if (currentShip)                                   settings.currentShip     = currentShip;
-  if (!isNaN(currentSale))                           settings.currentSale     = currentSale;
-  if (!isNaN(currentProfitNM) && currentProfitNM > 0) settings.profitNM       = currentProfitNM;
-  if (targetShip)                                    settings.targetShip      = targetShip;
-  if (!isNaN(targetProfitNM)  && targetProfitNM  > 0) settings.targetProfitNM = targetProfitNM;
-  if (!isNaN(targetPrice) && targetPrice > 0) {
-    settings.targetPrice = targetPrice;
-    settings.sellPoint   = Math.max(0, targetPrice - (isNaN(currentSale) ? 0 : currentSale));
-  }
-  save();
-  document.getElementById('modal-backdrop').classList.add('hidden');
-  loadSettingsToForm();
-  render();
-}
-
-// ── HELPERS ────────────────────────────────────────────────────────────────
-const pn   = s => parseFloat(String(s).replace(/,/g, ''));
-const fmt  = v => `$${(v / 1e6).toFixed(2)}M`;
-const fmts = v => `$${(v / 1e6).toFixed(1)}M`;
-const fmtf = v => `$${Math.round(v).toLocaleString()}`;
-const fmtNum = v => (v && !isNaN(v) && Number(v) > 0) ? Math.round(Number(v)).toLocaleString() : '';
-
-function formatInput(el) {
-  const v = pn(el.value);
-  if (!isNaN(v) && v > 0) el.value = Math.round(v).toLocaleString();
-}
-
-function calcDuration(s, e) {
-  if (!s || !e) return null;
-  const [sh, sm] = s.split(':').map(Number);
-  const [eh, em] = e.split(':').map(Number);
-  let m = (eh * 60 + em) - (sh * 60 + sm);
-  if (m < 0) m += 1440;
-  return m > 0 ? m : null;
-}
-
-function stats() {
-  const completed = runs.slice(1);
-  const avgNet = completed.length
-    ? completed.reduce((a, r) => a + r.net, 0) / completed.length
-    : 0;
-  const timed = completed.filter(r => r.duration);
-  const avgDur = timed.length
-    ? timed.reduce((a, r) => a + r.duration, 0) / timed.length
-    : 45;
-  return { completed, avgNet, timed, avgDur };
-}
-
-// ── RENDER ─────────────────────────────────────────────────────────────────
-function render() {
-  if (runs.length === 0) return;
-
-  const latest = runs[runs.length - 1];
-  const { completed, avgNet, timed, avgDur } = stats();
-  const { sellPoint, currentSale, targetPrice, currentShip, targetShip } = settings;
-
-  // Header
-  document.getElementById('hdr-current-ship').textContent = currentShip || '—';
-  document.getElementById('hdr-target-ship').textContent  = targetShip  || '—';
-
-  // Progress bar
-  const pct = sellPoint > 0 ? Math.min(100, (latest.balance / sellPoint) * 100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('prog-current').textContent = fmt(latest.balance) + ' current';
-  document.getElementById('prog-pct').textContent     = pct.toFixed(1) + '%';
-  document.getElementById('prog-target').textContent  = sellPoint > 0 ? fmt(sellPoint) + ' sell point' : 'Set sell point in Settings';
-
-  // Dashboard empty state
-  const hasRuns = completed.length > 0;
-  document.getElementById('dashboard-empty').style.display    = hasRuns ? 'none' : 'block';
-  document.getElementById('dashboard-content').style.display  = hasRuns ? 'block' : 'none';
-
-  if (!hasRuns) return;
-
-  // Stats
-  const stillToSell = Math.max(0, sellPoint - latest.balance);
-  const tripsToSell = avgNet > 0 ? Math.ceil(stillToSell / avgNet) : 0;
-  const minsToSell  = tripsToSell * avgDur;
-
-  const incomePerHour = timed.length > 0 ? (avgNet / avgDur) * 60 : 0;
-  document.getElementById('stat-balance').textContent    = fmt(latest.balance);
-  document.getElementById('stat-needed').textContent     = sellPoint > 0 ? fmt(stillToSell) : '—';
-  document.getElementById('stat-income-hr').textContent  = incomePerHour > 0 ? fmts(incomePerHour) : '—';
-  document.getElementById('stat-time').textContent       = avgNet > 0 ? `~${(minsToSell / 60).toFixed(1)} hrs` : '—';
-
-  // Prediction
-  // "Trips after selling" = if you sold NOW, how many more trips to target price
-  const afterSaleNow  = latest.balance + currentSale;
-  const stillAfterNow = Math.max(0, targetPrice - afterSaleNow);
-  const tripsAfter    = avgNet > 0 ? Math.max(0, Math.ceil(stillAfterNow / avgNet)) : 0;
-  // Total to target = trips to sell point + trips from (sellPoint + resale) to targetPrice
-  const balAfterSell      = sellPoint + currentSale;
-  const stillForTarget    = Math.max(0, targetPrice - balAfterSell);
-  const tripsForTarget    = avgNet > 0 ? Math.ceil(stillForTarget / avgNet) : 0;
-  const totalTrips        = tripsToSell + tripsForTarget;
-  const totalHours        = (totalTrips * avgDur) / 60;
-  const durLabel          = timed.length < 2 ? ' (est.)' : '';
-
-  document.getElementById('pred-label').textContent =
-    `SMART PREDICTION \u00B7 ${completed.length} runs, avg ${avgDur.toFixed(0)} min/trip`;
-  document.getElementById('pred-avg-net').textContent      = fmts(avgNet);
-  document.getElementById('pred-avg-dur').textContent      = `${avgDur.toFixed(0)} min${durLabel}`;
-  document.getElementById('pred-current-ship').textContent  = (currentShip || 'CURRENT SHIP').toUpperCase();
-  document.getElementById('pred-sale-val').textContent     = currentSale > 0 ? fmt(currentSale) : '—';
-  document.getElementById('pred-after-trips').textContent  = avgNet > 0 ? `~${tripsAfter} more trips` : '—';
-  document.getElementById('pred-target-ship-label').textContent = (targetShip || 'TARGET SHIP').toUpperCase();
-  document.getElementById('pred-total').textContent = avgNet > 0
-    ? `~${totalTrips} trips \u00B7 ~${totalHours.toFixed(1)} hrs estimated`
-    : 'Log more runs for a prediction';
-
-  // Log hint
-  const logHint = document.getElementById('log-hint');
-  logHint.style.display = 'inline-flex';
-  logHint.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><text x="6" y="9" text-anchor="middle" font-size="8" font-family="sans-serif" fill="currentColor">i</text></svg> Gross = (New Balance \u2212 ${fmtf(latest.balance)}) + Fuel Cost`;
-  document.getElementById('log-btn').textContent = `+ LOG RUN ${completed.length + 1}`;
-
-  // History
-  const tbody = document.getElementById('history-tbody');
-  tbody.innerHTML = runs.map((r, idx) => `
-    <tr>
-      <td class="left" style="color:var(--cyan);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'run')">${r.run}</td>
-      <td class="right" style="cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'balance')">${fmt(r.balance)}</td>
-      <td class="right" style="color:var(--red);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'fuel')">${r.fuel ? '-' + fmt(r.fuel) : '\u2014'}</td>
-      <td class="right">${r.gross ? fmt(r.gross) : '\u2014'}</td>
-      <td class="right" style="color:${r.net > 0 ? 'var(--green)' : 'var(--red)'}">${r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014'}</td>
-      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoStart')">${r.odoStart ? Math.round(r.odoStart).toLocaleString() : '\u2014'}</td>
-      <td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'odoEnd')">${r.odoEnd ? Math.round(r.odoEnd).toLocaleString() : '\u2014'}</td>
-      <td class="right" style="color:#f9a825">${(r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? Math.round(r.odoEnd - r.odoStart).toLocaleString() + ' NM' : '\u2014'}</td>
-      <td class="right" style="color:var(--purple);cursor:pointer" title="Click to edit" onclick="editCell(event,${idx},'duration')">${r.duration ? r.duration + 'm' : '\u2014'}</td>
-      <td class="right" style="color:var(--cyan)">${(r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? fmtf(r.net / (r.odoEnd - r.odoStart)) : '\u2014'}</td>
-      <td class="right" style="color:var(--green)">${(r.duration && r.duration > 0) ? fmtf(r.net / r.duration) : '\u2014'}</td>
-      <td class="right">${idx > 0 ? `<button onclick="deleteRun(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:0 4px" title="Delete run">&times;</button>` : ''}</td>
-    </tr>`).join('');
-
-  document.getElementById('hist-label').textContent = `RUN HISTORY \u00B7 ${completed.length} runs logged`;
-  if (completed.length > 0) {
-    document.getElementById('totals-row').style.display = 'grid';
-    document.getElementById('tot-earned').textContent = fmt(latest.balance - runs[0].balance);
-    document.getElementById('tot-fuel').textContent   = '-' + fmt(completed.reduce((a, r) => a + r.fuel, 0));
-    document.getElementById('tot-time').textContent   = timed.reduce((a, r) => a + r.duration, 0) + 'm';
-  }
-
-  drawChart(tripsToSell, avgNet, sellPoint, targetPrice);
-  renderEfficiency();
-}
-
-// ── CHART (canvas) ─────────────────────────────────────────────────────────
-const chartLayers = { projection: true, duration: true, odometer: true, sell: true, target: true };
-
-function toggleChartLayer(btn) {
-  const layer = btn.dataset.layer;
-  chartLayers[layer] = !chartLayers[layer];
-  btn.classList.toggle('active', chartLayers[layer]);
-  const { tripsToSell, avgNet, sellPoint, targetPrice } = (() => {
-    const { completed, timed } = stats();
-    const avgNet = completed.length > 1 ? completed.slice(1).reduce((a,r)=>a+r.net,0)/(completed.length-1) : 0;
-    const sp = settings.sellPoint || 0;
-    const tp = settings.targetPrice || 0;
-    const tts = avgNet > 0 ? Math.ceil(Math.max(0, sp - runs[runs.length-1].balance) / avgNet) : 0;
-    return { tripsToSell: tts, avgNet, sellPoint: sp, targetPrice: tp };
-  })();
-  drawChart(tripsToSell, avgNet, sellPoint, targetPrice);
-}
-
-function drawChart(tripsToSell, avgNet, sellPoint, targetPrice) {
-  const isLight = document.body.classList.contains('light');
-  const container = document.getElementById('chart-container');
-  let canvas = container.querySelector('canvas');
-  if (!canvas) {
-    canvas = document.createElement('canvas');
-    canvas.style.width  = '100%';
-    canvas.style.height = '100%';
-    container.appendChild(canvas);
-  }
-  canvas.width  = container.clientWidth  || 600;
-  canvas.height = container.clientHeight || 220;
-  const W = canvas.width, H = canvas.height;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-
-  const clrGrid   = isLight ? '#d0dce8' : '#0c1c2c';
-  const clrLabel  = isLight ? '#4a6a84' : '#2a4a5e';
-  const clrActual = isLight ? '#0277bd' : '#4fc3f7';
-  const clrProj   = isLight ? '#0277bd66' : '#4fc3f744';
-  const clrSell   = isLight ? '#bf5e00' : '#ffa726';
-  const clrTarget = isLight ? '#2e7d32' : '#66bb6a';
-  const clrDur    = isLight ? '#6a1b9a' : '#ab47bc';
-  const clrOdo    = '#f9a825';
-
-  // Build data points
-  const actual = runs.map((r, i) => ({ x: i, y: r.balance, label: r.run }));
-  const proj   = [];
-  let pb = runs[runs.length - 1].balance;
-  const MAX_PROJ = avgNet > 0 ? Math.min(tripsToSell + 3, 25) : 0;
-  for (let i = 1; i <= MAX_PROJ; i++) {
-    pb = Math.min(pb + avgNet, Math.max(sellPoint, targetPrice));
-    proj.push({ x: runs.length - 1 + i, y: pb });
-  }
-
-  const allY  = [...actual, ...proj].map(p => p.y);
-  const minY  = 0;
-  const maxY  = Math.max(...allY, targetPrice || 0, sellPoint || 0) * 1.05 || 1;
-  const totalX = actual.length + proj.length - 1 || 1;
-
-  const timedRuns = runs.filter(r => r.duration);
-  const maxDur    = timedRuns.length ? Math.max(...timedRuns.map(r => r.duration)) : 0;
-  const hasDur    = maxDur > 0 && chartLayers.duration;
-  const PAD = { l: 60, r: hasDur ? 52 : 16, t: 14, b: 28 };
-  const gW  = W - PAD.l - PAD.r;
-  const gH  = H - PAD.t - PAD.b;
-
-  const xOf = x => PAD.l + (x / totalX) * gW;
-  const yOf = y => PAD.t + gH - ((y - minY) / (maxY - minY)) * gH;
-
-  // Grid
-  ctx.strokeStyle = clrGrid; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = PAD.t + (i / 4) * gH;
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-    const val = maxY - (i / 4) * (maxY - minY);
-    ctx.fillStyle = clrLabel; ctx.font = '9px JetBrains Mono,monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText('$' + (val / 1e6).toFixed(0) + 'M', PAD.l - 4, y + 3);
-  }
-
-  // Reference lines
-  const drawRef = (val, color, label) => {
-    if (!val) return;
-    const y = yOf(val);
-    if (y < PAD.t || y > PAD.t + gH) return;
-    ctx.save();
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-    ctx.fillStyle = color; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'left';
-    ctx.fillText(label, PAD.l + 3, y - 3);
-    ctx.restore();
-  };
-  if (chartLayers.sell)   drawRef(sellPoint,   clrSell,   'SELL');
-  if (chartLayers.target) drawRef(targetPrice, clrTarget, 'TARGET');
-
-  // Projected line
-  if (chartLayers.projection && proj.length > 0) {
-    const projPts = [actual[actual.length - 1], ...proj];
-    ctx.save();
-    ctx.strokeStyle = clrProj; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    projPts.forEach((p, i) => {
-      const x = xOf(actual.length - 1 + i);
-      const y = yOf(p.y);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke(); ctx.restore();
-  }
-
-  // Actual line
-  ctx.save();
-  ctx.strokeStyle = clrActual; ctx.lineWidth = 2; ctx.setLineDash([]);
-  ctx.beginPath();
-  actual.forEach((p, i) => {
-    i === 0 ? ctx.moveTo(xOf(p.x), yOf(p.y)) : ctx.lineTo(xOf(p.x), yOf(p.y));
-  });
-  ctx.stroke();
-  actual.forEach(p => {
-    ctx.beginPath(); ctx.arc(xOf(p.x), yOf(p.y), 3, 0, Math.PI * 2);
-    ctx.fillStyle = clrActual; ctx.fill();
-  });
-  ctx.restore();
-
-  // Duration bars (right y-axis)
-  if (chartLayers.duration && hasDur) {
-    const yOfDur = d => PAD.t + gH - (d / maxDur) * gH;
-    const BAR_W  = Math.max(4, Math.min(10, gW / (runs.length * 2)));
-
-    runs.forEach((r, i) => {
-      if (!r.duration) return;
-      const x    = xOf(i);
-      const barH = (r.duration / maxDur) * gH;
-      ctx.save();
-      ctx.fillStyle = clrDur + '55';
-      ctx.strokeStyle = clrDur + 'aa';
-      ctx.lineWidth = 1;
-      ctx.fillRect(x - BAR_W / 2, PAD.t + gH - barH, BAR_W, barH);
-      ctx.strokeRect(x - BAR_W / 2, PAD.t + gH - barH, BAR_W, barH);
-      ctx.restore();
-    });
-
-    // Right axis labels
-    ctx.fillStyle = clrDur; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'left';
-    for (let i = 0; i <= 4; i++) {
-      const d = maxDur * (1 - i / 4);
-      const y = PAD.t + (i / 4) * gH;
-      ctx.fillText(Math.round(d) + 'm', W - PAD.r + 4, y + 3);
-    }
-  }
-
-  // Odometer line
-  const odoRuns = runs.map((r, i) => ({ x: i, v: r.odoEnd ?? r.odoStart ?? null })).filter(p => p.v != null);
-  if (chartLayers.odometer && odoRuns.length > 1) {
-    const minOdo = Math.min(...odoRuns.map(p => p.v));
-    const maxOdo = Math.max(...odoRuns.map(p => p.v));
-    const yOfOdo = v => maxOdo === minOdo ? PAD.t + gH / 2 : PAD.t + gH - ((v - minOdo) / (maxOdo - minOdo)) * gH;
-    ctx.save();
-    ctx.strokeStyle = clrOdo; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    odoRuns.forEach((p, i) => {
-      i === 0 ? ctx.moveTo(xOf(p.x), yOfOdo(p.v)) : ctx.lineTo(xOf(p.x), yOfOdo(p.v));
-    });
-    ctx.stroke();
-    odoRuns.forEach(p => {
-      ctx.beginPath(); ctx.arc(xOf(p.x), yOfOdo(p.v), 2, 0, Math.PI * 2);
-      ctx.fillStyle = clrOdo; ctx.fill();
-    });
-    ctx.restore();
-  }
-
-  // X labels
-  ctx.fillStyle = clrLabel; ctx.font = '8px JetBrains Mono,monospace'; ctx.textAlign = 'center';
-  actual.forEach(p => ctx.fillText(p.label.replace('Run ', 'R'), xOf(p.x), H - PAD.b + 12));
-}
-
-// ── LOG RUN ────────────────────────────────────────────────────────────────
-function updatePreview() {
-  const b    = pn(document.getElementById('inp-balance').value);
-  const f    = pn(document.getElementById('inp-fuel').value);
-  const prev = document.getElementById('run-preview');
-  if (isNaN(b) || isNaN(f)) { prev.style.display = 'none'; return; }
-  const latest = runs[runs.length - 1];
-  const net    = b - latest.balance;
-  const gross  = net + f;
-  prev.style.display = 'block';
-  document.getElementById('prev-gross').textContent = fmt(gross);
-  document.getElementById('prev-gross').style.color = gross > 0 ? 'var(--text)' : 'var(--red)';
-  document.getElementById('prev-fuel').textContent  = '-' + fmt(f);
-  document.getElementById('prev-net').textContent   = (net > 0 ? '+' : '') + fmt(net);
-  document.getElementById('prev-net').style.color   = net > 0 ? 'var(--green)' : 'var(--red)';
-}
-
-function updateDurPreview() {
-  const s  = document.getElementById('inp-start').value;
-  const e  = document.getElementById('inp-end').value;
-  const d  = calcDuration(s, e);
-  const el = document.getElementById('dur-preview');
-  const { avgDur } = stats();
-  if (d !== null) {
-    el.style.display = 'block';
-    el.innerHTML = `\u23F1 ${d} min trip <span>\u00B7 avg is ${avgDur.toFixed(0)} min</span>`;
-  } else { el.style.display = 'none'; }
-}
-
-function logRun() {
-  const errEl = document.getElementById('log-error');
-  errEl.style.display = 'none';
-  if (runs.length === 0) { showStartBalanceModal(); return; }
-  const bal  = pn(document.getElementById('inp-balance').value);
-  const fuel = pn(document.getElementById('inp-fuel').value);
-  const odoStart = pn(document.getElementById('inp-odo-start').value);
-  const odoEnd   = pn(document.getElementById('inp-odo-end').value);
-  const dur  = calcDuration(
-    document.getElementById('inp-start').value,
-    document.getElementById('inp-end').value
-  );
-  if (isNaN(bal) || isNaN(fuel)) {
-    errEl.textContent = 'Balance and fuel cost are required.';
-    errEl.style.display = 'block'; return;
-  }
-  const prev  = runs[runs.length - 1];
-  const net   = bal - prev.balance;
-  const gross = net + fuel;
-  const { completed } = stats();
-  runs.push({
-    id: Date.now(),
-    run: `Run ${completed.length + 1}`,
-    balance: bal,
-    fuel,
-    gross,
-    net,
-    odoStart: (!isNaN(odoStart) && odoStart > 0) ? odoStart : null,
-    odoEnd:   (!isNaN(odoEnd)   && odoEnd   > 0) ? odoEnd   : null,
-    duration: dur,
-    timestamp: new Date().toISOString()
-  });
-  document.getElementById('inp-balance').value   = '';
-  document.getElementById('inp-fuel').value      = '';
-  document.getElementById('inp-odo-start').value = '';
-  document.getElementById('inp-odo-end').value   = '';
-  document.getElementById('inp-start').value     = '';
-  document.getElementById('inp-end').value       = '';
-  document.getElementById('run-preview').style.display  = 'none';
-  document.getElementById('dur-preview').style.display  = 'none';
-  clearLogForm();
-  save(); render();
-  switchTab('dashboard');
-}
-
-function undoLast() {
-  if (runs.length > 1) { runs.pop(); save(); render(); }
-}
-
-function deleteRun(idx) {
-  if (idx === 0 || idx >= runs.length) return;
-  runs.splice(idx, 1);
-  recalcRuns();
-  save(); render();
-}
-
-// ── HISTORY EDITING ────────────────────────────────────────────────────────
-function recalcRuns() {
-  for (let i = 1; i < runs.length; i++) {
-    runs[i].net   = runs[i].balance - runs[i - 1].balance;
-    runs[i].gross = runs[i].net + runs[i].fuel;
-  }
-}
-
-function editCell(e, idx, field) {
-  const td = e.currentTarget;
-  if (td.querySelector('input')) return; // already editing
-  const r = runs[idx];
-  let rawVal = '';
-  if (field === 'balance')  rawVal = r.balance  || '';
-  if (field === 'fuel')     rawVal = r.fuel     || '';
-  if (field === 'odoStart') rawVal = r.odoStart || '';
-  if (field === 'odoEnd')   rawVal = r.odoEnd   || '';
-  if (field === 'duration') rawVal = r.duration || '';
-  if (field === 'run')      rawVal = r.run;
-
-  const inp = document.createElement('input');
-  inp.type  = 'text';
-  inp.value = rawVal;
-  inp.style.cssText = `
-    width:100%;min-width:80px;background:var(--input-bg);
-    border:1px solid var(--cyan);border-radius:3px;
-    padding:3px 6px;color:var(--text);font-family:var(--mono);
-    font-size:0.78rem;text-align:${field === 'run' ? 'left' : 'right'};outline:none;
-  `;
-  inp.onblur    = () => saveCell(idx, field, inp.value);
-  inp.onkeydown = ev => {
-    if (ev.key === 'Enter') inp.blur();
-    if (ev.key === 'Escape') render();
-  };
-  td.textContent = '';
-  td.appendChild(inp);
-  inp.focus();
-  inp.select();
-}
-
-function saveCell(idx, field, rawValue) {
-  const r = runs[idx];
-  if (field === 'run') {
-    const v = rawValue.trim();
-    if (v) r.run = v;
-  } else if (field === 'balance') {
-    const v = pn(rawValue);
-    if (!isNaN(v) && v >= 0) { r.balance = v; recalcRuns(); }
-  } else if (field === 'fuel') {
-    const v = pn(rawValue);
-    if (!isNaN(v) && v >= 0) {
-      r.fuel  = v;
-      r.net   = r.balance - (runs[idx - 1]?.balance ?? r.balance);
-      r.gross = r.net + r.fuel;
-    }
-  } else if (field === 'odoStart') {
-    const v = pn(rawValue);
-    r.odoStart = (!isNaN(v) && v > 0) ? v : null;
-  } else if (field === 'odoEnd') {
-    const v = pn(rawValue);
-    r.odoEnd = (!isNaN(v) && v > 0) ? v : null;
-  } else if (field === 'duration') {
-    const v = parseInt(rawValue);
-    r.duration = (!isNaN(v) && v > 0) ? v : null;
-  }
-  save();
-  render();
-}
-
-function resetAll() {
-  if (!confirm('Reset everything?\n\nThis will clear your run history AND all ship settings (ship name, prices, cargo, etc.).\n\nOK = Reset everything\nCancel = Do nothing')) return;
-  runs = [];
-  settings = { ...DEFAULT_SETTINGS };
-  loadSettingsToForm();
-  save();
-  render();
-  showStartBalanceModal();
-}
-
-// ── SELL POINT CALC ────────────────────────────────────────────────────────
-function calcSellPoint() {
-  const sale  = pn(document.getElementById('set-current-sale').value);
-  const price = pn(document.getElementById('set-target-price').value);
-  if (!isNaN(sale) && !isNaN(price) && sale >= 0 && price > 0) {
-    const sp = Math.max(0, price - sale);
-    document.getElementById('set-sell-point').value = Math.round(sp).toLocaleString();
-  }
-  saveSettings();
-}
-
-// ── SETTINGS ──────────────────────────────────────────────────────────────
-function loadSettingsToForm() {
-  document.getElementById('set-current-ship').value     = settings.currentShip    || '';
-  document.getElementById('set-current-sale').value     = fmtNum(settings.currentSale)    || '';
-  document.getElementById('set-sell-point').value       = fmtNum(settings.sellPoint)      || '';
-  document.getElementById('set-profit-nm').value        = fmtNum(settings.profitNM)       || '';
-  document.getElementById('set-target-ship').value      = settings.targetShip     || '';
-  document.getElementById('set-target-price').value     = fmtNum(settings.targetPrice)    || '';
-  document.getElementById('set-target-profit-nm').value = fmtNum(settings.targetProfitNM) || '';
-  document.getElementById('set-cargo').value            = settings.cargo          || '';
-  document.getElementById('set-start-balance').value    = fmtNum(settings.startBalance)   || '';
-  // Reflect auto-calculated sell point (don't override if already set)
-  if (settings.sellPoint) {
-    document.getElementById('set-sell-point').value = Math.round(settings.sellPoint).toLocaleString();
-  } else {
-    const sale  = settings.currentSale  || 0;
-    const price = settings.targetPrice  || 0;
-    if (price > 0) document.getElementById('set-sell-point').value = Math.round(Math.max(0, price - sale)).toLocaleString();
-  }
-}
-
-function saveSettings() {
-  applySettings(true);
-}
-
-function applySettings(silent = false) {
-  const g  = id => pn(document.getElementById(id).value);
-  const gs = id => document.getElementById(id).value.trim();
-
-  if (gs('set-current-ship'))    settings.currentShip    = gs('set-current-ship');
-  if (!isNaN(g('set-current-sale')) && g('set-current-sale') >= 0) settings.currentSale = g('set-current-sale');
-  if (!isNaN(g('set-sell-point'))   && g('set-sell-point')   >= 0) settings.sellPoint   = g('set-sell-point');
-  if (!isNaN(g('set-profit-nm'))    && g('set-profit-nm')    >= 0) settings.profitNM    = g('set-profit-nm');
-  if (gs('set-target-ship'))     settings.targetShip     = gs('set-target-ship');
-  if (!isNaN(g('set-target-price'))     && g('set-target-price')     >= 0) settings.targetPrice     = g('set-target-price');
-  if (!isNaN(g('set-target-profit-nm')) && g('set-target-profit-nm') >= 0) settings.targetProfitNM = g('set-target-profit-nm');
-  if (gs('set-cargo'))           settings.cargo          = gs('set-cargo');
-
-  const newStartBal = g('set-start-balance');
-  if (!isNaN(newStartBal) && newStartBal >= 0 && newStartBal !== settings.startBalance) {
-    settings.startBalance = newStartBal;
-    if (runs.length > 0) {
-      runs[0].balance = newStartBal;
-    }
-  }
-
-  save();
-  if (runs.length > 0) render();
-  if (!silent) {
-    const el = document.getElementById('settings-saved');
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 2000);
-  }
-}
-
-// ── EXPORT / IMPORT ────────────────────────────────────────────────────────
-function exportStamp() {
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10);
-  const time = now.toTimeString().slice(0, 5).replace(':', 'h') + 'm';
-  const ship = (settings.currentShip || 'export').replace(/\s+/g, '-').toLowerCase();
-  return `${ship}_${date}_${time}`;
-}
-
-function exportJSON() {
-  const data = JSON.stringify({ runs, settings }, null, 2);
-  const a = document.createElement('a');
-  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
-  a.download = `shipping-${exportStamp()}.json`;
-  a.click();
-}
-
-function exportCSV() {
-  const rows = [['Run', 'Balance', 'Fuel', 'Gross', 'Net', 'Duration (min)', 'Timestamp']];
-  runs.forEach(r => rows.push([r.run, r.balance, r.fuel, r.gross, r.net, r.duration || '', r.timestamp]));
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `shipping-${exportStamp()}.csv`;
-  a.click();
-}
-
-function importJSON() {
-  const errEl = document.getElementById('import-error');
-  errEl.style.display = 'none';
-  try {
-    const data = JSON.parse(document.getElementById('import-area').value);
-    if (!data.runs || !Array.isArray(data.runs)) throw new Error('Invalid format');
-    runs = data.runs;
-    if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
-    save(); loadSettingsToForm(); render();
-    document.getElementById('import-area').value = '';
-    alert('Data imported successfully!');
-  } catch (e) {
-    errEl.textContent = 'Invalid JSON: ' + e.message;
-    errEl.style.display = 'block';
-  }
-}
-
-function copyShareURL() {
-  const s = {
-    b: settings.startBalance, cs: settings.currentShip, cr: settings.currentSale,
-    sp: settings.sellPoint,   pn: settings.profitNM,    ts: settings.targetShip,
-    tp: settings.targetPrice, tn: settings.targetProfitNM, cg: settings.cargo
-  };
-  // Compact run arrays: [balance, fuel, odoStart||0, odoEnd||0, duration||0]
-  let r = runs.map(run => [run.balance, run.fuel||0, run.odoStart||0, run.odoEnd||0, run.duration||0]);
-  const prefix = location.href.split('?')[0] + '?data=';
-  // Trim oldest logged runs (keep r[0] = initial balance) until URL fits ≤2000 chars
-  while (r.length > 1) {
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, s, r }))));
-    if ((prefix + encoded).length <= 2000) break;
-    r = [r[0], ...r.slice(2)];
-  }
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({ v: 2, s, r }))));
-  const longUrl = prefix + encoded;
-  const btn = document.getElementById('share-btn');
-  const el  = document.getElementById('share-copied');
-
-  btn.disabled = true;
-  btn.textContent = 'Shortening…';
-
-  fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl))
-    .then(res => res.ok ? res.text() : Promise.reject())
-    .then(short => navigator.clipboard.writeText(short.trim()).then(() => {
-      el.style.color = 'var(--green)';
-      el.textContent = 'Short URL copied! ' + short.trim();
-    }))
-    .catch(() => navigator.clipboard.writeText(longUrl).then(() => {
-      el.style.color = 'var(--muted)';
-      el.textContent = 'Copied full URL (shortener unavailable)';
-    }))
-    .finally(() => {
-      el.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = '🔗 Copy Share URL';
-      setTimeout(() => el.style.display = 'none', 4000);
-    });
-}
-
-function loadFromURL() {
-  const p = new URLSearchParams(location.search);
-  if (!p.has('data')) return;
-  try {
-    let data;
-    try {
-      data = JSON.parse(decodeURIComponent(escape(atob(p.get('data')))));
-    } catch {
-      // Fall back to old URL format
-      data = JSON.parse(decodeURIComponent(atob(p.get('data'))));
-    }
-    if (data.v === 2) {
-      const s = data.s || {};
-      settings = { ...DEFAULT_SETTINGS,
-        startBalance: s.b||0, currentShip: s.cs||'', currentSale: s.cr||0,
-        sellPoint: s.sp||0,   profitNM: s.pn||0,     targetShip: s.ts||'',
-        targetPrice: s.tp||0, targetProfitNM: s.tn||0, cargo: s.cg||''
-      };
-      runs = (data.r || []).map((a, i) => ({
-        balance: a[0], fuel: a[1]||0,
-        odoStart: a[2]||null, odoEnd: a[3]||null, duration: a[4]||null,
-        run: i === 0 ? 'Start' : `Run ${i}`, gross: 0, net: 0
-      }));
-      runs.forEach((r, i) => {
-        if (i === 0) return;
-        r.net = r.balance - runs[i-1].balance;
-        r.gross = r.net + r.fuel;
-      });
-    } else {
-      if (data.runs) runs = data.runs;
-      if (data.settings) settings = { ...DEFAULT_SETTINGS, ...data.settings };
-    }
-  } catch {}
-  // Remove ?data= from the URL so refreshing doesn't overwrite localStorage again
-  history.replaceState(null, '', location.pathname);
-}
-
-// ── LOG FORM PERSISTENCE ───────────────────────────────────────────────────
-function saveLogForm() {
-  try {
-    localStorage.setItem(LOG_FORM_KEY, JSON.stringify({
-      balance:  document.getElementById('inp-balance').value,
-      fuel:     document.getElementById('inp-fuel').value,
-      odoStart: document.getElementById('inp-odo-start').value,
-      odoEnd:   document.getElementById('inp-odo-end').value,
-      start:    document.getElementById('inp-start').value,
-      end:      document.getElementById('inp-end').value,
-    }));
-  } catch {}
-}
-
-function loadLogForm() {
-  try {
-    const raw = localStorage.getItem(LOG_FORM_KEY);
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    const set = (id, val) => { if (val != null && val !== '') { const el = document.getElementById(id); el.value = val; formatInput(el); } };
-    set('inp-balance',   d.balance);
-    set('inp-fuel',      d.fuel);
-    set('inp-odo-start', d.odoStart);
-    set('inp-odo-end',   d.odoEnd);
-    // time inputs don't need formatting
-    if (d.start) document.getElementById('inp-start').value = d.start;
-    if (d.end)   document.getElementById('inp-end').value   = d.end;
-    if (runs.length > 0) { updatePreview(); updateDurPreview(); }
-  } catch {}
-}
-
-function clearLogForm() {
-  localStorage.removeItem(LOG_FORM_KEY);
-}
-
-// ── EFFICIENCY TAB ─────────────────────────────────────────────────────────
-function renderEfficiency() {
-  if (runs.length === 0) return;
-  const completed = runs.slice(1);
-  const hasRuns = completed.length > 0;
-  document.getElementById('eff2-empty').style.display   = hasRuns ? 'none'  : 'block';
-  document.getElementById('eff2-content').style.display = hasRuns ? 'block' : 'none';
-  if (!hasRuns) return;
-
-  const nmRuns    = completed.filter(r => r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0);
-  const timedRuns = completed.filter(r => r.duration && r.duration > 0);
-
-  const nmData  = nmRuns.map(r => ({ run: r.run, nm: r.odoEnd - r.odoStart, perNM: r.net / (r.odoEnd - r.odoStart) }));
-  const minData = timedRuns.map(r => ({ run: r.run, perMin: r.net / r.duration }));
-
-  const avgNM   = nmData.length  ? nmData.reduce((a, d) => a + d.perNM, 0) / nmData.length  : 0;
-  const bestNM  = nmData.length  ? Math.max(...nmData.map(d => d.perNM))                    : 0;
-  const avgMin  = minData.length ? minData.reduce((a, d) => a + d.perMin, 0) / minData.length : 0;
-  const bestMin = minData.length ? Math.max(...minData.map(d => d.perMin))                   : 0;
-  const totalNM  = nmRuns.reduce((a, r) => a + (r.odoEnd - r.odoStart), 0);
-  const totalMin = timedRuns.reduce((a, r) => a + r.duration, 0);
-
-  document.getElementById('eff2-avg-nm').textContent   = avgNM  > 0 ? fmtf(avgNM)  + '/NM'  : '—';
-  document.getElementById('eff2-best-nm').textContent  = bestNM > 0 ? fmtf(bestNM) + '/NM'  : '—';
-  document.getElementById('eff2-avg-min').textContent  = avgMin  > 0 ? fmtf(avgMin)  + '/min' : '—';
-  document.getElementById('eff2-best-min').textContent = bestMin > 0 ? fmtf(bestMin) + '/min' : '—';
-  document.getElementById('eff2-total-nm').textContent   = totalNM  > 0 ? Math.round(totalNM).toLocaleString() + ' NM' : '—';
-  document.getElementById('eff2-total-time').textContent = totalMin > 0 ? (totalMin >= 60 ? (totalMin / 60).toFixed(1) + ' hrs' : totalMin + ' min') : '—';
-
-  const adv = settings.profitNM;
-  const tgt = settings.targetProfitNM;
-  document.getElementById('eff2-advertised-nm').textContent = adv > 0 ? fmtf(adv) + '/NM' : '—';
-  document.getElementById('eff2-actual-nm').textContent     = avgNM  > 0 ? fmtf(avgNM)  + '/NM' : '—';
-  document.getElementById('eff2-target-nm').textContent     = tgt > 0 ? fmtf(tgt) + '/NM' : '—';
-
-  const vsAdvEl = document.getElementById('eff2-vs-adv');
-  if (adv > 0 && avgNM > 0) {
-    const vsAdv = (avgNM - adv) / adv * 100;
-    vsAdvEl.textContent = (vsAdv >= 0 ? '+' : '') + vsAdv.toFixed(1) + '%';
-    vsAdvEl.style.color = vsAdv >= 0 ? 'var(--green)' : 'var(--red)';
-  } else { vsAdvEl.textContent = '—'; vsAdvEl.style.color = ''; }
-
-  const gainEl = document.getElementById('eff2-gain');
-  if (tgt > 0 && avgNM > 0) {
-    const gain = (tgt - avgNM) / avgNM * 100;
-    gainEl.textContent = (gain >= 0 ? '+' : '') + gain.toFixed(1) + '% earnings boost on upgrade';
-    gainEl.style.color = gain > 0 ? 'var(--green)' : 'var(--red)';
-  } else { gainEl.textContent = '—'; gainEl.style.color = ''; }
-
-  document.getElementById('eff2-table-label').textContent = `PER-RUN EFFICIENCY \u00B7 ${completed.length} runs`;
-  const tbody = document.getElementById('eff2-tbody');
-  tbody.innerHTML = completed.map(r => {
-    const nm     = (r.odoEnd && r.odoStart && r.odoEnd - r.odoStart > 0) ? r.odoEnd - r.odoStart : null;
-    const perNM  = nm !== null ? r.net / nm : null;
-    const perMin = (r.duration && r.duration > 0) ? r.net / r.duration : null;
-    const vsAvg  = (perNM !== null && avgNM > 0) ? (perNM - avgNM) / avgNM * 100 : null;
-    return `<tr>
-      <td class="left" style="color:var(--cyan)">${r.run}</td>
-      <td class="right" style="color:#f9a825">${nm !== null ? Math.round(nm).toLocaleString() + ' NM' : '\u2014'}</td>
-      <td class="right" style="color:var(--cyan)">${perNM !== null ? fmtf(perNM) : '\u2014'}</td>
-      <td class="right" style="color:var(--green)">${perMin !== null ? fmtf(perMin) : '\u2014'}</td>
-      <td class="right" style="color:${vsAvg !== null ? (vsAvg >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)'}">${vsAvg !== null ? (vsAvg >= 0 ? '+' : '') + vsAvg.toFixed(1) + '%' : '\u2014'}</td>
-    </tr>`;
+  document.getElementById('route-load').innerHTML = optionsHTML;
+  document.getElementById('route-unload').innerHTML = optionsHTML;
+
+  // Populate ports table
+  var tbody = document.getElementById('ports-tbody');
+  tbody.innerHTML = PORT_DATABASE.filter(function(p) { return p.multiplier > 0; }).map(function(p) {
+    var multiColor = p.multiplier > 1 ? 'var(--green)' : p.multiplier < 1 ? 'var(--red)' : 'var(--text)';
+    return '<tr>'
+      + '<td class="left">' + p.name + '</td>'
+      + '<td class="right" style="color:' + multiColor + '">' + p.multiplier + 'x</td>'
+      + '<td class="right">' + (p.dwtLimit ? p.dwtLimit.toLocaleString() + ' DWT' : 'None') + '</td>'
+      + '<td class="left" style="color:var(--muted)">' + p.region + '</td>'
+      + '</tr>';
   }).join('');
-
-  if (nmData.length > 0 || minData.length > 0) {
-    document.getElementById('eff2-totals-row').style.display = 'grid';
-    document.getElementById('eff2-tot-nm-row').textContent   = totalNM  > 0 ? Math.round(totalNM).toLocaleString() + ' NM' : '—';
-    document.getElementById('eff2-tot-avg-nm').textContent   = avgNM  > 0 ? fmtf(avgNM)  + '/NM'  : '—';
-    document.getElementById('eff2-tot-avg-min').textContent  = avgMin  > 0 ? fmtf(avgMin)  + '/min' : '—';
-  }
-
-  drawEfficiencyChart(nmData);
-}
-
-function drawEfficiencyChart(nmData) {
-  const isLight = document.body.classList.contains('light');
-  const container = document.getElementById('eff2-chart-container');
-  let canvas = container.querySelector('canvas');
-  if (!canvas) {
-    canvas = document.createElement('canvas');
-    canvas.style.width = '100%'; canvas.style.height = '100%';
-    container.appendChild(canvas);
-  }
-  canvas.width  = container.clientWidth  || 600;
-  canvas.height = container.clientHeight || 220;
-  const W = canvas.width, H = canvas.height;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-
-  const clrLabel = isLight ? '#4a6a84' : '#6a8fa8';
-  if (nmData.length < 2) {
-    ctx.fillStyle = clrLabel; ctx.font = '11px JetBrains Mono, monospace'; ctx.textAlign = 'center';
-    ctx.fillText('Log odometer readings on 2+ runs to see $/NM trend', W / 2, H / 2);
-    return;
-  }
-
-  const clrGrid = isLight ? '#d0dce8' : '#0c1c2c';
-  const clrNM   = isLight ? '#0277bd' : '#4fc3f7';
-  const clrAdv  = isLight ? '#bf5e00' : '#ffa726';
-  const clrTgt  = isLight ? '#6a1b9a' : '#ab47bc';
-  const adv = settings.profitNM;
-  const tgt = settings.targetProfitNM;
-
-  const allVals = [...nmData.map(d => d.perNM), adv > 0 ? adv : 0, tgt > 0 ? tgt : 0].filter(v => v > 0);
-  const dataMin = Math.min(...nmData.map(d => d.perNM));
-  const dataMax = Math.max(...allVals);
-  const pad = (dataMax - dataMin) * 0.18 || dataMax * 0.12 || 1;
-  const minVal = Math.max(0, dataMin - pad);
-  const maxVal = dataMax + pad;
-  const range  = maxVal - minVal || 1;
-
-  const totalX = nmData.length - 1 || 1;
-  const PAD = { l: 72, r: 16, t: 14, b: 28 };
-  const gW = W - PAD.l - PAD.r;
-  const gH = H - PAD.t - PAD.b;
-  const xOf = i => PAD.l + (i / totalX) * gW;
-  const yOf = v => PAD.t + gH - ((v - minVal) / range) * gH;
-
-  // Grid
-  ctx.strokeStyle = clrGrid; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = PAD.t + (i / 4) * gH;
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-    const val = maxVal - (i / 4) * range;
-    ctx.fillStyle = clrLabel; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'right';
-    ctx.fillText('$' + (val >= 1e6 ? (val / 1e6).toFixed(1) + 'M' : (val / 1000).toFixed(0) + 'k'), PAD.l - 4, y + 3);
-  }
-
-  // Reference lines
-  const drawRef = (val, color, label) => {
-    if (!(val > 0)) return;
-    const y = yOf(val);
-    if (y < PAD.t - 2 || y > PAD.t + gH + 2) return;
-    ctx.save();
-    ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
-    ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
-    ctx.fillStyle = color; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'left';
-    ctx.fillText(label, PAD.l + 3, y - 3);
-    ctx.restore();
-  };
-  drawRef(adv, clrAdv, 'ADVERTISED');
-  drawRef(tgt, clrTgt, 'TARGET');
-
-  // Area fill under line
-  ctx.save();
-  const grad = ctx.createLinearGradient(0, PAD.t, 0, PAD.t + gH);
-  grad.addColorStop(0, clrNM + '33'); grad.addColorStop(1, clrNM + '00');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.moveTo(xOf(0), PAD.t + gH);
-  nmData.forEach((d, i) => ctx.lineTo(xOf(i), yOf(d.perNM)));
-  ctx.lineTo(xOf(nmData.length - 1), PAD.t + gH);
-  ctx.closePath(); ctx.fill(); ctx.restore();
-
-  // Avg line
-  const avgNM = nmData.reduce((a, d) => a + d.perNM, 0) / nmData.length;
-  const avgY  = yOf(avgNM);
-  if (avgY >= PAD.t && avgY <= PAD.t + gH) {
-    ctx.save();
-    ctx.strokeStyle = clrNM + '55'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
-    ctx.beginPath(); ctx.moveTo(PAD.l, avgY); ctx.lineTo(W - PAD.r, avgY); ctx.stroke();
-    ctx.fillStyle = clrNM + 'aa'; ctx.font = '9px JetBrains Mono,monospace'; ctx.textAlign = 'right';
-    ctx.fillText('AVG', W - PAD.r - 2, avgY - 3);
-    ctx.restore();
-  }
-
-  // $/NM line + dots
-  ctx.save();
-  ctx.strokeStyle = clrNM; ctx.lineWidth = 2; ctx.setLineDash([]);
-  ctx.beginPath();
-  nmData.forEach((d, i) => i === 0 ? ctx.moveTo(xOf(i), yOf(d.perNM)) : ctx.lineTo(xOf(i), yOf(d.perNM)));
-  ctx.stroke();
-  nmData.forEach((d, i) => {
-    ctx.beginPath(); ctx.arc(xOf(i), yOf(d.perNM), 3, 0, Math.PI * 2);
-    ctx.fillStyle = clrNM; ctx.fill();
-  });
-  ctx.restore();
-
-  // X labels
-  ctx.fillStyle = clrLabel; ctx.font = '8px JetBrains Mono,monospace'; ctx.textAlign = 'center';
-  nmData.forEach((d, i) => ctx.fillText(d.run.replace('Run ', 'R'), xOf(i), H - PAD.b + 12));
-}
-
-// ── TABS ───────────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(el => {
-    if (el.textContent.toLowerCase().replace(/[\s/]/g, '').startsWith(name.replace('-', '')))
-      el.classList.add('active');
-  });
-  if (name === 'dashboard' && runs.length > 0) {
-    const { avgNet } = stats();
-    drawChart(
-      avgNet > 0 ? Math.ceil(Math.max(0, settings.sellPoint - runs[runs.length - 1].balance) / avgNet) : 0,
-      avgNet, settings.sellPoint, settings.targetPrice
-    );
-  }
-  if (name === 'efficiency' && runs.length > 0) {
-    renderEfficiency();
-  }
-}
-
-// ── INIT ───────────────────────────────────────────────────────────────────
-load();
-loadFromURL();
-loadTheme();
-loadSettingsToForm();
-
-if (runs.length === 0) {
-  showStartBalanceModal();
-} else {
-  render();
-}
-
-loadLogForm();
-
-['inp-balance','inp-fuel','inp-odo-start','inp-odo-end','inp-start','inp-end'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener('input',  saveLogForm);
-  el.addEventListener('change', saveLogForm);
-  el.addEventListener('blur',   saveLogForm);
-});
-
-window.addEventListener('resize', () => { if (runs.length > 0) render(); });
-
-// Build date footer
-document.body.insertAdjacentHTML('beforeend',
-  `<div style="text-align:center;padding:16px 0 8px;font-size:0.65rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.1em">
-    BUILD ${BUILD_DATE} &nbsp;&middot;&nbsp;
-    <a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.8">SHIPPING LANES WIKI &#8599;</a>
-  </div>
-  <div style="text-align:center;padding:0 24px 24px;font-size:0.62rem;color:var(--muted);font-family:var(--mono);opacity:0.5;line-height:1.6">
-    Entirely vibe coded &mdash; AI-assisted, no formal engineering process. Works fine, probably.
-  </div>`);
+})();
 </script>
+<script src="js/init.js"></script>
 </body>
 </html>
