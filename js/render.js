@@ -227,6 +227,26 @@ function renderRouteCalculator() {
 
   container.innerHTML = html;
 }
+function clearRouteCalculator() {
+  const ship = document.getElementById('route-ship');
+  const load = document.getElementById('route-load');
+  const unload = document.getElementById('route-unload');
+  const dist = document.getElementById('route-distance');
+  if (ship) ship.value = '';
+  if (load) load.value = '';
+  if (unload) unload.value = '';
+  if (dist) dist.value = '';
+  document.getElementById('route-result').innerHTML = '';
+}
+
+function clearJobComparison() {
+  document.getElementById('jc-rows').innerHTML = '';
+  document.getElementById('jc-result').innerHTML = '';
+  _jcRowId = 0;
+  _jcLastShip = null;
+  addJobRow(); addJobRow(); addJobRow();
+}
+
 // -- JOB COMPARISON --
 let _jcRowId = 0;
 let _jcLastShip = null;

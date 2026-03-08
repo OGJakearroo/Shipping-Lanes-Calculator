@@ -603,6 +603,12 @@ function loadLogForm() {
 }
 
 function clearLogForm() {
+  ['inp-balance','inp-fuel','inp-odo-start','inp-odo-end','inp-start','inp-end'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('run-preview').style.display = 'none';
+  document.getElementById('dur-preview').style.display = 'none';
   localStorage.removeItem(LOG_FORM_KEY);
 }
 
