@@ -244,15 +244,16 @@ function clearJobComparison() {
   document.getElementById('jc-result').innerHTML = '';
   _jcRowId = 0;
   _jcLastShip = null;
-  addJobRow(); addJobRow(); addJobRow();
+  _appendJobRow(); _appendJobRow(); _appendJobRow();
+  renderJobComparison();
 }
 
 // -- JOB COMPARISON --
 let _jcRowId = 0;
 let _jcLastShip = null;
 
-function addJobRow(labelVal, distVal, payVal) {
-  const id = _jcRowId++;
+function _appendJobRow(labelVal, distVal, payVal) {
+  _jcRowId++;
   const wrap = document.getElementById('jc-rows');
   if (!wrap) return;
   const row = document.createElement('div');
@@ -263,6 +264,10 @@ function addJobRow(labelVal, distVal, payVal) {
     '<input type="text" placeholder="Payout ($)" value="' + (payVal || '') + '" oninput="renderJobComparison()" onblur="formatInput(this)">' +
     '<button class="jc-remove" onclick="this.closest(\'.jc-row\').remove();renderJobComparison()" title="Remove">&times;</button>';
   wrap.appendChild(row);
+}
+
+function addJobRow(labelVal, distVal, payVal) {
+  _appendJobRow(labelVal, distVal, payVal);
   renderJobComparison();
 }
 
@@ -279,6 +284,15 @@ function renderJobComparison() {
   const speed = speedEl ? (parseFloat(speedEl.value) || 0) : 0;
 
   const rows = document.querySelectorAll('#jc-rows .jc-row');
+
+  // Auto-add blank row if last row is now filled
+  if (rows.length > 0) {
+    const lastInputs = rows[rows.length - 1].querySelectorAll('input');
+    if ((parseFloat(lastInputs[1].value) || 0) > 0 && pn(lastInputs[2].value) > 0) {
+      _appendJobRow();
+    }
+  }
+
   const jobs = [];
   rows.forEach(row => {
     const inputs = row.querySelectorAll('input');
