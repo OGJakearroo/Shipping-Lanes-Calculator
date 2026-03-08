@@ -1,68 +1,81 @@
 // Ship database for Roblox Shipping Lanes
 // Sources: https://roblox-shipping-lanes.fandom.com/wiki/Ship_List
 // Resale = 30% of purchase price for all ships
-// Last updated: 2026-03-07
+// Last updated: 2026-03-08
 
 const SHIP_DATABASE = [
   // ── BULK CARRIERS ──
-  { name: "Small Bulk Carrier",      price: 0,           profitNM: 3500,    speed: 15, dwt: 5000,    cargo: "Bulk",   tier: "starter" },
-  { name: "Handysize",               price: 500000,      profitNM: 7300,    speed: 16, dwt: 28000,   cargo: "Bulk",   tier: "early" },
-  { name: "Handymax",                price: 2000000,     profitNM: 15000,   speed: 17, dwt: 45000,   cargo: "Bulk",   tier: "early" },
-  { name: "Panamax Bulk Carrier",    price: 6000000,     profitNM: 30000,   speed: 16, dwt: 75000,   cargo: "Bulk",   tier: "early" },
-  { name: "York Bulk Carrier",       price: 12000000,    profitNM: 55000,   speed: 32, dwt: 35000,   cargo: "Bulk",   tier: "mid" },
-  { name: "Capesize",                price: 46000000,    profitNM: 340000,  speed: 18, dwt: 180000,  cargo: "Bulk",   tier: "mid" },
-  { name: "Very Large Ore Carrier",  price: 100000000,   profitNM: 430000,  speed: 18, dwt: 400000,  cargo: "Bulk",   tier: "late" },
-  { name: "Seamax Ore Carrier",      price: 245000000,   profitNM: 787500,  speed: 18, dwt: 614763,  cargo: "Bulk",   tier: "endgame" },
-  { name: "S.S Great Eastern",       price: 350000000,   profitNM: 900000,  speed: 25, dwt: 400000,  cargo: "Bulk",   tier: "endgame" },
-  { name: "Grand Ore Carrier",       price: 716000000,   profitNM: 1100000, speed: 16, dwt: 900000,  cargo: "Bulk",   tier: "endgame" },
+  { name: "Small Bulk Carrier",      price: 0,            profitNM: 400,      speed: 23, dwt: 600,      cargo: "Bulk",      tier: "starter" },
+  { name: "York Bulk Carrier",       price: 5950,         profitNM: 690,      speed: 32, dwt: 2000,     cargo: "Bulk",      tier: "starter" },
+  { name: "Mini Bulk Carrier",       price: 13500,        profitNM: 1015,     speed: 26, dwt: 9000,     cargo: "Bulk",      tier: "early" },
+  { name: "Handysize",               price: 105470,       profitNM: 7351,     speed: 23, dwt: 35000,    cargo: "Bulk",      tier: "early" },
+  { name: "Lloyd-Class Ore Carrier", price: 560000,       profitNM: 23351,    speed: 23, dwt: 50000,    cargo: "Bulk",      tier: "early" },
+  { name: "Handymax",                price: 760000,       profitNM: 28840,    speed: 21, dwt: 45000,    cargo: "Bulk",      tier: "early" },
+  { name: "Supramax",                price: 1200000,      profitNM: 46000,    speed: 20, dwt: 60000,    cargo: "Bulk",      tier: "early" },
+  { name: "Panamax Bulk Carrier",    price: 2400000,      profitNM: 75500,    speed: 19, dwt: 75000,    cargo: "Bulk",      tier: "mid" },
+  { name: "Stanley Class Freighter", price: 4400000,      profitNM: 97500,    speed: 23, dwt: 80000,    cargo: "Bulk",      tier: "mid" },
+  { name: "Hobart Class Freighter",  price: 11500000,     profitNM: 160000,   speed: 23, dwt: 88000,    cargo: "Bulk",      tier: "mid" },
+  { name: "Transit Class Freighter", price: 25400000,     profitNM: 200000,   speed: 22, dwt: 94000,    cargo: "Bulk",      tier: "mid" },
+  { name: "Capesize",                price: 46000000,     profitNM: 340000,   speed: 19, dwt: 156000,   cargo: "Bulk",      tier: "late" },
+  { name: "Very Large Ore Carrier",  price: 75406000,     profitNM: 430000,   speed: 18, dwt: 400000,   cargo: "Bulk",      tier: "late" },
+  { name: "Hull 1173",               price: 125000000,    profitNM: 169000,   speed: 28, dwt: 280000,   cargo: "Bulk",      tier: "late" },
+  { name: "Gauntlet Cargo Liner",    price: 150000000,    profitNM: 449500,   speed: 23, dwt: 10000,    cargo: "Bulk",      tier: "late" },
+  { name: "Seamax Ore Carrier",      price: 245000000,    profitNM: 767500,   speed: 18, dwt: 614763,   cargo: "Bulk",      tier: "endgame" },
+  { name: "Grand Ore Carrier",       price: 716000000,    profitNM: 1170000,  speed: 17, dwt: 999000,   cargo: "Bulk",      tier: "endgame" },
+  { name: "S.S Great Eastern",       price: 1700000000,   profitNM: 990000,   speed: 23, dwt: 10000,    cargo: "Bulk",      tier: "endgame" },
 
   // ── CONTAINER SHIPS ──
-  { name: "Small Container Ship",    price: 0,           profitNM: 4000,    speed: 14, dwt: 0,       cargo: "Container", tier: "starter", containers: 120 },
-  { name: "Long Trade Ship",         price: 300000,      profitNM: 6000,    speed: 15, dwt: 0,       cargo: "Container", tier: "early",   containers: 200 },
-  { name: "Inland Container Carrier",price: 800000,      profitNM: 9000,    speed: 14, dwt: 0,       cargo: "Container", tier: "early",   containers: 350 },
-  { name: "York Container Ship",     price: 2500000,     profitNM: 18000,   speed: 28, dwt: 0,       cargo: "Container", tier: "early",   containers: 280 },
-  { name: "Perth Class",             price: 3500000,     profitNM: 22000,   speed: 18, dwt: 0,       cargo: "Container", tier: "early",   containers: 500 },
-  { name: "Medium Container Ship",   price: 4000000,     profitNM: 28000,   speed: 16, dwt: 0,       cargo: "Container", tier: "mid",     containers: 680 },
-  { name: "Panamax Container Ship",  price: 4500000,     profitNM: 35000,   speed: 18, dwt: 0,       cargo: "Container", tier: "mid",     containers: 900 },
-  { name: "SL-7",                    price: 18000000,    profitNM: 85000,   speed: 33, dwt: 0,       cargo: "Container", tier: "mid",     containers: 1096 },
-  { name: "B-Class",                 price: 25000000,    profitNM: 120000,  speed: 22, dwt: 0,       cargo: "Container", tier: "mid",     containers: 1800 },
-  { name: "Stanley Class Freighter", price: 50000000,    profitNM: 200000,  speed: 22, dwt: 0,       cargo: "Container", tier: "late",    containers: 2500 },
-  { name: "Prometheus Class",        price: 130000000,   profitNM: 400000,  speed: 22, dwt: 0,       cargo: "Container", tier: "late",    containers: 4200 },
-  { name: "Quad-A Class",            price: 310000000,   profitNM: 600000,  speed: 20, dwt: 0,       cargo: "Container", tier: "endgame", containers: 6120 },
-  { name: "Maximus Class",           price: 409500000,   profitNM: 650000,  speed: 22, dwt: 0,       cargo: "Container", tier: "endgame", containers: 6752 },
+  { name: "Small Container Ship",    price: 0,            profitNM: 200,      speed: 23, dwt: 500,      cargo: "Container", tier: "starter",  containers: 8 },
+  { name: "Long Trade Ship",         price: 1950,         profitNM: 380,      speed: 22, dwt: 1500,     cargo: "Container", tier: "starter",  containers: 16 },
+  { name: "Inland Container Carrier",price: 2550,         profitNM: 400,      speed: 22, dwt: 1500,     cargo: "Container", tier: "early",    containers: 24 },
+  { name: "York Container Ship",     price: 6950,         profitNM: 690,      speed: 32, dwt: 1000,     cargo: "Container", tier: "early",    containers: 50 },
+  { name: "Perth Class",             price: 25000,        profitNM: 2012,     speed: 22, dwt: 3000,     cargo: "Container", tier: "early",    containers: 60 },
+  { name: "Medium Container Ship",   price: 55268,        profitNM: 3351,     speed: 20, dwt: 7000,     cargo: "Container", tier: "early",    containers: 146 },
+  { name: "Zenlift Container Ship",  price: 180000,       profitNM: 8200,     speed: 21, dwt: 26000,    cargo: "Container", tier: "early",    containers: 420 },
+  { name: "Panamax Container Ship",  price: 4500000,      profitNM: 89000,    speed: 22, dwt: 61500,    cargo: "Container", tier: "mid",      containers: 1022 },
+  { name: "T2 Container Ship",       price: 51000000,     profitNM: 230000,   speed: 21, dwt: 50000,    cargo: "Container", tier: "late",     containers: 199 },
+  { name: "Atlantic Class",          price: 110000000,    profitNM: 592500,   speed: 20, dwt: 196000,   cargo: "Container", tier: "late",     containers: 3936 },
+  { name: "Container Boat",          price: 125000000,    profitNM: 169000,   speed: 29, dwt: 5,        cargo: "Container", tier: "late",     containers: 1 },
+  { name: "Quad-A Class",            price: 310000000,    profitNM: 790000,   speed: 22, dwt: 200000,   cargo: "Container", tier: "endgame",  containers: 6120 },
+  { name: "Maximus Class",           price: 409500000,    profitNM: 815000,   speed: 22, dwt: 225000,   cargo: "Container", tier: "endgame",  containers: 6752 },
 
   // ── OIL TANKERS ──
-  { name: "General Purpose Tanker",  price: 0,           profitNM: 5000,    speed: 14, dwt: 10000,   cargo: "Oil",    tier: "starter" },
-  { name: "Coastal Tanker",          price: 1500000,     profitNM: 12000,   speed: 15, dwt: 16500,   cargo: "Oil",    tier: "early" },
-  { name: "Aframax Tanker",          price: 5000000,     profitNM: 40000,   speed: 16, dwt: 120000,  cargo: "Oil",    tier: "mid" },
-  { name: "Suezmax Tanker",          price: 10000000,    profitNM: 60000,   speed: 16, dwt: 160000,  cargo: "Oil",    tier: "mid" },
-  { name: "Very Large Crude Carrier",price: 15000000,    profitNM: 80000,   speed: 16, dwt: 320000,  cargo: "Oil",    tier: "mid" },
-  { name: "Seawise-Giant",           price: 200000000,   profitNM: 350000,  speed: 16, dwt: 564763,  cargo: "Oil",    tier: "endgame" },
-  { name: "Batillus Supertanker",    price: 350000000,   profitNM: 700000,  speed: 17, dwt: 550000,  cargo: "Oil",    tier: "endgame" },
+  { name: "General Purpose Tanker",  price: 298000,       profitNM: 0,        speed: 24, dwt: 18700,    cargo: "Oil",       tier: "early" },
+  { name: "Aframax Tanker",          price: 999500,       profitNM: 0,        speed: 22, dwt: 90000,    cargo: "Oil",       tier: "early" },
+  { name: "Suezmax Tanker",          price: 4000000,      profitNM: 0,        speed: 20, dwt: 125000,   cargo: "Oil",       tier: "mid" },
+  { name: "Very Large Crude Carrier",price: 15000000,     profitNM: 0,        speed: 18, dwt: 320000,   cargo: "Oil",       tier: "mid" },
+  { name: "Ultra Large Crude Carrier",price: 47000000,    profitNM: 0,        speed: 17, dwt: 441893,   cargo: "Oil",       tier: "late" },
+  { name: "Seawise-Giant",           price: 190000000,    profitNM: 0,        speed: 16.5, dwt: 564763, cargo: "Oil",       tier: "endgame" },
+  { name: "Batillus Supertanker",    price: 300000000,    profitNM: 0,        speed: 20, dwt: 630962,   cargo: "Oil",       tier: "endgame" },
 
   // ── GAS CARRIERS ──
-  { name: "Small LNG Carrier",       price: 3000000,     profitNM: 25000,   speed: 16, dwt: 25000,   cargo: "Gas",    tier: "early" },
-  { name: "Conventional LNG Carrier",price: 45000000,    profitNM: 350000,  speed: 20, dwt: 90000,   cargo: "Gas",    tier: "mid" },
-  { name: "Q-Flex LNG Carrier",      price: 120000000,   profitNM: 500000,  speed: 20, dwt: 216000,  cargo: "Gas",    tier: "late" },
-  { name: "Q-Max LNG Carrier",       price: 250000000,   profitNM: 800000,  speed: 20, dwt: 266000,  cargo: "Gas",    tier: "endgame" },
+  { name: "Q-Mini LNG Carrier",      price: 20000000,     profitNM: 145000,   speed: 25, dwt: 17800,    cargo: "Gas",       tier: "mid" },
+  { name: "Conventional LNG Carrier",price: 55548000,     profitNM: 330000,   speed: 23, dwt: 84878,    cargo: "Gas",       tier: "mid" },
+  { name: "Gem Class LNG Carrier",   price: 76700000,     profitNM: 430000,   speed: 19, dwt: 94028,    cargo: "Gas",       tier: "late" },
+  { name: "Absolute LNG Carrier",    price: 110000000,    profitNM: 580000,   speed: 20, dwt: 163922,   cargo: "Gas",       tier: "late" },
+  { name: "Prometheus Class",        price: 330000000,    profitNM: 780000,   speed: 22, dwt: 463522,   cargo: "Gas",       tier: "endgame" },
 
-  // ── VEHICLE TRANSPORTERS (Ro-Ro) ──
-  { name: "High Speed Transporter",  price: 8000000,     profitNM: 45000,   speed: 30, dwt: 15000,   cargo: "Vehicle", tier: "mid" },
-  { name: "Electrified Ferry",       price: 20000000,    profitNM: 90000,   speed: 28, dwt: 20000,   cargo: "Vehicle", tier: "mid" },
-  { name: "Trimaran Cargo Transporter",price: 60000000,  profitNM: 250000,  speed: 35, dwt: 30000,   cargo: "Vehicle", tier: "late" },
-  { name: "Mover Class Transporter", price: 150000000,   profitNM: 450000,  speed: 26, dwt: 50000,   cargo: "Vehicle", tier: "late" },
-  { name: "Space Class Transporter", price: 280000000,   profitNM: 620000,  speed: 30, dwt: 60000,   cargo: "Vehicle", tier: "endgame" },
-  { name: "King Class Transporter",  price: 420000000,   profitNM: 750000,  speed: 28, dwt: 80000,   cargo: "Vehicle", tier: "endgame" },
+  // ── VEHICLE TRANSPORTERS ──
+  { name: "High Speed Transporter",  price: 490000,       profitNM: 7800,     speed: 50, dwt: 1000,     cargo: "Vehicle",   tier: "early" },
+  { name: "Electrified Ferry",       price: 7942000,      profitNM: 97500,    speed: 32, dwt: 2000,     cargo: "Vehicle",   tier: "mid" },
+  { name: "Trimaran Cargo Transporter",price: 9942000,    profitNM: 89000,    speed: 45, dwt: 3500,     cargo: "Vehicle",   tier: "mid" },
+  { name: "Space Class Transporter", price: 38530000,     profitNM: 220000,   speed: 23, dwt: 21820,    cargo: "Vehicle",   tier: "late" },
+  { name: "King Class Transporter",  price: 55000000,     profitNM: 340000,   speed: 23, dwt: 25820,    cargo: "Vehicle",   tier: "late" },
+  { name: "Mover Class Transporter", price: 109000000,    profitNM: 605000,   speed: 20, dwt: 41820,    cargo: "Vehicle",   tier: "endgame" },
 
   // ── HEAVY LIFTERS ──
-  { name: "Small Heavy Lifter",      price: 15000000,    profitNM: 70000,   speed: 18, dwt: 8000,    cargo: "Heavy",  tier: "mid" },
-  { name: "Prototype Heavy Lifter",  price: 45000000,    profitNM: 290000,  speed: 22, dwt: 20000,   cargo: "Heavy",  tier: "mid" },
-  { name: "Striker Heavy Lifter",    price: 90000000,    profitNM: 375000,  speed: 28, dwt: 30000,   cargo: "Heavy",  tier: "late" },
-  { name: "Leviathan Heavy Lifter",  price: 400000000,   profitNM: 700000,  speed: 24, dwt: 80000,   cargo: "Heavy",  tier: "endgame" },
-  { name: "Megalodon Heavy Lifter",  price: 600000000,   profitNM: 950000,  speed: 22, dwt: 120000,  cargo: "Heavy",  tier: "endgame" },
+  { name: "Prototype Heavy Lifter",  price: 46000000,     profitNM: 290000,   speed: 24, dwt: 41820,    cargo: "Heavy",     tier: "mid" },
+  { name: "Striker Heavy Lifter",    price: 90000000,     profitNM: 375000,   speed: 28, dwt: 43220,    cargo: "Heavy",     tier: "late" },
+  { name: "Goliath Heavy Lifter",    price: 199000000,    profitNM: 695000,   speed: 22, dwt: 81490,    cargo: "Heavy",     tier: "late" },
+  { name: "Leviathan Heavy Lifter",  price: 400000000,    profitNM: 815000,   speed: 18, dwt: 116173,   cargo: "Heavy",     tier: "endgame" },
+  { name: "Behemoth Heavy Lifter",   price: 530000000,    profitNM: 1000000,  speed: 25, dwt: 116173,   cargo: "Heavy",     tier: "endgame" },
+  { name: "Megalodon Heavy Lifter",  price: 630000000,    profitNM: 1050000,  speed: 18, dwt: 116173,   cargo: "Heavy",     tier: "endgame" },
+
+  // ── CON-RO (CONTAINER + VEHICLE HYBRID) ──
+  { name: "Multi Class Freighter",   price: 225000000,    profitNM: 670000,   speed: 23, dwt: 100430,   cargo: "Con-Ro",    tier: "endgame" },
 
   // ── MISC / SPECIAL ──
-  { name: "Midway Class Carrier",    price: 800000000,   profitNM: 1200000, speed: 30, dwt: 100000,  cargo: "Special", tier: "endgame" },
+  { name: "Midway Class Carrier",    price: 3980000000,   profitNM: 0,        speed: 32, dwt: 64000,    cargo: "Special",   tier: "endgame" },
 ];
 
 // Pre-compute resale values (30% of price)
@@ -87,6 +100,7 @@ const CARGO_COLORS = {
   Gas:       "var(--green)",
   Vehicle:   "var(--purple)",
   Heavy:     "#f9a825",
+  "Con-Ro":  "var(--cyan)",
   Special:   "var(--cyan)"
 };
 

@@ -578,7 +578,7 @@
 
   // Populate ports table
   var tbody = document.getElementById('ports-tbody');
-  tbody.innerHTML = PORT_DATABASE.filter(function(p) { return p.multiplier > 0; }).map(function(p) {
+  tbody.innerHTML = PORT_DATABASE.map(function(p) {
     var multiColor = p.multiplier > 1 ? 'var(--green)' : p.multiplier < 1 ? 'var(--red)' : 'var(--text)';
     return '<tr>'
       + '<td class="left">' + p.name + '</td>'
