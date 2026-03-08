@@ -82,6 +82,9 @@ document.body.insertAdjacentHTML('beforeend',
   + 'BUILD ' + BUILD_DATE + ' &nbsp;&middot;&nbsp;'
   + '<a href="https://roblox-shipping-lanes.fandom.com/wiki/Shipping_Lanes_Wiki" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.8">SHIPPING LANES WIKI &#8599;</a>'
   + '</div>'
-  + '<div style="text-align:center;padding:0 24px 24px;font-size:0.62rem;color:var(--muted);font-family:var(--mono);opacity:0.5;line-height:1.6">'
+  + '<div style="text-align:center;padding:0 24px 8px;font-size:0.62rem;color:var(--muted);font-family:var(--mono);opacity:0.5;line-height:1.6">'
   + 'Entirely vibe coded &mdash; AI-assisted, no formal engineering process. Works fine, probably.'
+  + '</div>'
+  + '<div style="text-align:center;padding:0 24px 24px;font-size:0.62rem;color:var(--muted);font-family:var(--mono);opacity:0.6;line-height:1.6">'
+  + '&#9888; Data is stored in your browser only &mdash; back up regularly via <strong>Export &rarr; Share URL</strong> or <strong>Export JSON</strong>.'
   + '</div>');
