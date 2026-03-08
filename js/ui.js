@@ -222,9 +222,6 @@ function switchTab(name) {
   if (name === 'routes') {
     renderRouteCalculator();
   }
-  if (name === 'upgrade') {
-    renderUpgradePath();
-  }
 }
 
 // -- LOG RUN --

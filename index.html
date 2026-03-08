@@ -127,7 +127,6 @@
     <button class="tab-btn" data-tab="efficiency" onclick="switchTab('efficiency')">EFFICIENCY</button>
     <button class="tab-btn" data-tab="log" onclick="switchTab('log')">LOG RUN</button>
     <button class="tab-btn" data-tab="routes" onclick="switchTab('routes')">ROUTES</button>
-    <button class="tab-btn" data-tab="upgrade" onclick="switchTab('upgrade')">UPGRADE</button>
     <button class="tab-btn" data-tab="history" onclick="switchTab('history')">HISTORY</button>
     <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">SETTINGS</button>
     <button class="tab-btn" data-tab="export" onclick="switchTab('export')">EXPORT</button>
@@ -412,25 +411,6 @@
     </div>
   </div>
 
-  <!-- UPGRADE PATH -->
-  <div class="tab-pane" id="tab-upgrade">
-    <div class="card">
-      <div class="card-label">UPGRADE PATH PLANNER</div>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:16px;line-height:1.5">
-        Shows available upgrades from your current ship with estimated runs and time to afford each one.
-        Set your current ship in Settings to get personalized results.
-      </div>
-      <div id="upgrade-path-content"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">ARCHIVED SEASONS</div>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px">When you upgrade ships, archive your current progress to start fresh while keeping lifetime stats.</div>
-      <div id="seasons-list"></div>
-      <button class="btn btn-muted btn-full" onclick="startNewSeason()" style="margin-top:8px">Archive Current &amp; Start New Season</button>
-    </div>
-  </div>
-
   <!-- HISTORY -->
   <div class="tab-pane" id="tab-history">
     <div class="card">
@@ -465,6 +445,13 @@
         <div><span style="color:var(--muted)">Total fuel: </span><span style="color:var(--red)" id="tot-fuel"></span></div>
         <div><span style="color:var(--muted)">Time logged: </span><span style="color:var(--purple)" id="tot-time"></span></div>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">ARCHIVED SEASONS</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px">When you upgrade ships, archive your current progress to start fresh while keeping lifetime stats.</div>
+      <div id="seasons-list"></div>
+      <button class="btn btn-muted btn-full" onclick="startNewSeason()" style="margin-top:8px">Archive Current &amp; Start New Season</button>
     </div>
   </div>
 

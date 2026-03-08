@@ -227,80 +227,9 @@ function renderRouteCalculator() {
 
   container.innerHTML = html;
 }
-
-// -- UPGRADE PATH PLANNER --
-function renderUpgradePath() {
-  const container = document.getElementById('upgrade-path-content');
-  if (!container) return;
-
-  const currentShip = findShip(settings.currentShip);
-  const { avgNet, avgDur, timed } = stats();
-  const currentBalance = runs.length > 0 ? runs[runs.length - 1].balance : 0;
-
-  // Get upgrade chain: current -> each next affordable ship in order of price
-  const upgrades = getNextShips(currentShip);
-  if (upgrades.length === 0) {
-    container.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:20px">Set your current ship in Settings to see upgrade paths.</div>';
-    return;
-  }
-
-  // Show a curated path (same cargo type preferred, or best value picks)
-  const sameCargoUpgrades = currentShip ? upgrades.filter(s => s.cargo === currentShip.cargo) : upgrades;
-  const bestUpgrades = (sameCargoUpgrades.length >= 3 ? sameCargoUpgrades : upgrades).slice(0, 10);
-
-  let html = '<div class="upgrade-path">';
-
-  // Show current ship
-  if (currentShip) {
-    html += '<div class="upgrade-step current">';
-    html += '<div></div>';
-    html += '<div class="step-info">';
-    html += '<div class="step-name" style="color:var(--cyan)">' + esc(currentShip.name) + ' (Current)</div>';
-    html += '<div class="step-detail">' + fmtf(currentShip.profitNM) + '/NM &middot; ' + esc(currentShip.cargo) + ' &middot; ' + currentShip.speed + ' kts</div>';
-    html += '</div>';
-    html += '<div class="step-cost" style="color:var(--cyan)">Balance: ' + fmt(currentBalance) + '</div>';
-    html += '</div>';
-  }
-
-  let runningBalance = currentBalance;
-  let runningResale = currentShip ? currentShip.resale : (settings.currentSale || 0);
-
-  bestUpgrades.forEach(ship => {
-    const costAfterSell = ship.price - runningResale;
-    const needToEarn = Math.max(0, costAfterSell - runningBalance);
-    const runsNeeded = avgNet > 0 ? Math.ceil(needToEarn / avgNet) : 0;
-    const hoursNeeded = timed.length > 0 ? (runsNeeded * avgDur / 60) : 0;
-    const profitBoost = currentShip && currentShip.profitNM > 0
-      ? ((ship.profitNM - currentShip.profitNM) / currentShip.profitNM * 100)
-      : 0;
-
-    html += '<div class="upgrade-step">';
-    html += '<div></div>';
-    html += '<div class="step-info">';
-    html += '<div class="step-name">' + esc(ship.name) + '</div>';
-    html += '<div class="step-detail">' + fmtf(ship.profitNM) + '/NM &middot; ' + esc(ship.cargo) + ' &middot; ' + ship.speed + ' kts';
-    if (profitBoost > 0) html += ' &middot; <span style="color:var(--green)">+' + profitBoost.toFixed(0) + '% earnings</span>';
-    html += '</div>';
-    html += '</div>';
-    html += '<div>';
-    html += '<div class="step-cost">' + fmt(ship.price) + '</div>';
-    if (runsNeeded > 0) {
-      html += '<div class="step-runs">~' + runsNeeded + ' runs';
-      if (hoursNeeded > 0) html += ' &middot; ~' + hoursNeeded.toFixed(1) + ' hrs';
-      html += '</div>';
-    } else {
-      html += '<div class="step-runs" style="color:var(--green)">Can afford now!</div>';
-    }
-    html += '</div>';
-    html += '</div>';
-  });
-
-  html += '</div>';
-  container.innerHTML = html;
-}
-
 // -- JOB COMPARISON --
 let _jcRowId = 0;
+let _jcLastShip = null;
 
 function addJobRow(labelVal, distVal, payVal) {
   const id = _jcRowId++;
@@ -318,21 +247,16 @@ function addJobRow(labelVal, distVal, payVal) {
 }
 
 function renderJobComparison() {
-  // Speed: prefer settings currentShip, fallback to manual input
   const settingsShip = findShip(settings.currentShip);
-  let speed = settingsShip ? settingsShip.speed : 0;
   const speedEl = document.getElementById('jc-speed');
-  if (speedEl) {
-    if (settingsShip) {
-      speedEl.value = settingsShip.speed;
-      speedEl.disabled = true;
-      speedEl.title = 'Auto-filled from current ship in Settings';
-    } else {
-      speedEl.disabled = false;
-      speedEl.removeAttribute('title');
-      speed = parseFloat(speedEl.value) || 0;
-    }
+  // Auto-fill speed only when ship changes; always allow manual edit
+  if (speedEl && settingsShip && settingsShip.name !== _jcLastShip) {
+    speedEl.value = settingsShip.speed;
+    _jcLastShip = settingsShip.name;
+  } else if (!settingsShip) {
+    _jcLastShip = null;
   }
+  const speed = speedEl ? (parseFloat(speedEl.value) || 0) : 0;
 
   const rows = document.querySelectorAll('#jc-rows .jc-row');
   const jobs = [];
