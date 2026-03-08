@@ -4,7 +4,7 @@
 
 A self-contained progress tracker for **Roblox Shipping Lanes**. No install, no account — runs entirely in your browser and saves data locally.
 
-**[Open the tracker](https://ogjakearroo.github.io/Shipping-Lanes-Calculator/)**
+**[Open the tracker](https://slt.jakearroo.com/)** — hosted on Cloudflare Pages
 
 ---
 
@@ -32,9 +32,16 @@ A self-contained progress tracker for **Roblox Shipping Lanes**. No install, no 
 - Click any cell to edit in-place; delete individual runs; undo last run
 - Totals row: total earned, total fuel cost, total time logged
 
+### Routes Tab
+- **Route calculator** — pick ship, load port, and unload port; port multipliers applied automatically by cargo type; optional distance field gives total profit estimate
+- **Job comparison** — enter multiple in-game job offers (payout + distance); calculator ranks them by $/min and highlights the best one; ship speed auto-fills from your current ship
+- **Port multiplier reference table** — all ports with their multiplier, DWT limit, and region
+
 ### Other
+- **Ship database** — 55+ ships with price, speed, DWT, and $/NM; auto-fills forms when you type a ship name
+- **Seasons / archiving** — archive your current run history when you upgrade ships, keeping lifetime stats while starting fresh
 - **Sell point auto-calc** — set target ship price and current ship resale; sell point is calculated automatically
-- **Persistent storage** — all data saved in `localStorage`; survives browser close
+- **Persistent storage** — all data saved in `localStorage`; survives browser close; back up via Share URL or Export JSON regularly
 - **Export to JSON** — full backup including settings, re-importable on any device
 - **Export to CSV** — run history as a spreadsheet-compatible file
 - **Import JSON** — restore any previous backup
@@ -46,7 +53,7 @@ A self-contained progress tracker for **Roblox Shipping Lanes**. No install, no 
 
 ## Getting Started
 
-1. Open the [tracker](https://ogjakearroo.github.io/Shipping-Lanes-Calculator/)
+1. Open the [tracker](https://slt.jakearroo.com/)
 2. A 3-step setup guide walks you through entering your balance, current ship details (including advertised $/NM), and target ship — with links to the [Ship List](https://roblox-shipping-lanes.fandom.com/wiki/Ship_List) where helpful
 3. After each run, go to **Log Run**, enter your new balance and fuel cost, and hit **Log Run**
 4. Optionally enter odometer start/end readings to enable $/NM efficiency tracking
