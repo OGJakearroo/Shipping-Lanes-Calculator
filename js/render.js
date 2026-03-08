@@ -70,12 +70,18 @@ function render() {
     const nm = (r.odoEnd && r.odoStart && (r.odoEnd - r.odoStart) > 0) ? r.odoEnd - r.odoStart : null;
     const perNM = nm ? r.net / nm : null;
     const perMin = (r.duration && r.duration > 0) ? r.net / r.duration : null;
-    return '<tr>'
+    const fuelPct = (r.gross > 0 && r.fuel > 0) ? (r.fuel / r.gross * 100).toFixed(1) + '%' : '\u2014';
+    let rowBg = '';
+    if (idx > 0 && r.net > avgNet)      rowBg = 'background:rgba(76,175,80,0.07)';
+    else if (idx > 0 && r.net > 0)      rowBg = 'background:rgba(239,83,80,0.07)';
+    else if (idx > 0)                   rowBg = 'background:rgba(239,83,80,0.12)';
+    return '<tr' + (rowBg ? ' style="' + rowBg + '"' : '') + '>'
       + '<td class="left" style="color:var(--cyan);cursor:pointer" title="Click to edit" onclick="editCell(event,' + idx + ',\'run\')">' + esc(r.run) + '</td>'
       + '<td class="right" style="cursor:pointer" title="Click to edit" onclick="editCell(event,' + idx + ',\'balance\')">' + fmt(r.balance) + '</td>'
       + '<td class="right" style="color:var(--red);cursor:pointer" title="Click to edit" onclick="editCell(event,' + idx + ',\'fuel\')">' + (r.fuel ? '-' + fmt(r.fuel) : '\u2014') + '</td>'
       + '<td class="right">' + (r.gross ? fmt(r.gross) : '\u2014') + '</td>'
       + '<td class="right" style="color:' + (r.net > 0 ? 'var(--green)' : 'var(--red)') + '">' + (r.net ? (r.net > 0 ? '+' : '') + fmt(r.net) : '\u2014') + '</td>'
+      + '<td class="right" style="color:var(--muted)">' + fuelPct + '</td>'
       + '<td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,' + idx + ',\'odoStart\')">' + (r.odoStart ? Math.round(r.odoStart).toLocaleString() : '\u2014') + '</td>'
       + '<td class="right" style="color:#f9a825;cursor:pointer" title="Click to edit" onclick="editCell(event,' + idx + ',\'odoEnd\')">' + (r.odoEnd ? Math.round(r.odoEnd).toLocaleString() : '\u2014') + '</td>'
       + '<td class="right" style="color:#f9a825">' + (nm ? Math.round(nm).toLocaleString() + ' NM' : '\u2014') + '</td>'

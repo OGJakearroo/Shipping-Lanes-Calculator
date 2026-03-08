@@ -294,6 +294,7 @@ function logRun() {
   document.getElementById('run-preview').style.display  = 'none';
   document.getElementById('dur-preview').style.display  = 'none';
   clearLogForm();
+  autoFillFuel();
   save(); render();
   switchTab('dashboard');
 }
@@ -586,18 +587,31 @@ function saveLogForm() {
   } catch {}
 }
 
+function autoFillFuel() {
+  const el = document.getElementById('inp-fuel');
+  if (!el || el.value) return;
+  const { completed } = stats();
+  const recent = completed.filter(r => r.fuel > 0).slice(-5);
+  if (!recent.length) return;
+  const avg = Math.round(recent.reduce((a, r) => a + r.fuel, 0) / recent.length);
+  el.value = avg.toLocaleString();
+  saveLogForm();
+}
+
 function loadLogForm() {
   try {
     const raw = localStorage.getItem(LOG_FORM_KEY);
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    const set = (id, val) => { if (val != null && val !== '') { const el = document.getElementById(id); el.value = val; formatInput(el); } };
-    set('inp-balance',   d.balance);
-    set('inp-fuel',      d.fuel);
-    set('inp-odo-start', d.odoStart);
-    set('inp-odo-end',   d.odoEnd);
-    if (d.start) document.getElementById('inp-start').value = d.start;
-    if (d.end)   document.getElementById('inp-end').value   = d.end;
+    if (raw) {
+      const d = JSON.parse(raw);
+      const set = (id, val) => { if (val != null && val !== '') { const el = document.getElementById(id); el.value = val; formatInput(el); } };
+      set('inp-balance',   d.balance);
+      set('inp-fuel',      d.fuel);
+      set('inp-odo-start', d.odoStart);
+      set('inp-odo-end',   d.odoEnd);
+      if (d.start) document.getElementById('inp-start').value = d.start;
+      if (d.end)   document.getElementById('inp-end').value   = d.end;
+    }
+    autoFillFuel();
     if (runs.length > 0) { updatePreview(); updateDurPreview(); }
   } catch {}
 }

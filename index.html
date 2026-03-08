@@ -140,10 +140,14 @@
   <!-- DASHBOARD -->
   <div class="tab-pane active" id="tab-dashboard">
     <div id="dashboard-empty" class="card" style="display:none">
-      <div class="empty-state">
-        <div class="empty-state-title">No runs logged yet</div>
-        <div class="empty-state-desc">Head to the <strong>Log Run</strong> tab after each trip to track your progress.</div>
+      <div class="empty-state-title" style="margin-bottom:10px">Ready to start tracking</div>
+      <div class="empty-state-desc" style="margin-bottom:18px">After each run in-game, log your new balance here to build your stats. The more you log, the more you unlock.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:0.8rem;margin-bottom:22px;line-height:1.5">
+        <div><strong style="color:var(--text)">Balance &amp; fuel</strong> <span style="color:var(--muted)">&mdash; required. Unlocks dashboard stats and balance chart.</span></div>
+        <div><strong style="color:var(--text)">Odometer start &amp; end</strong> <span style="color:var(--muted)">&mdash; optional. Unlocks $/NM efficiency tracking.</span></div>
+        <div><strong style="color:var(--text)">Trip start &amp; end times</strong> <span style="color:var(--muted)">&mdash; optional. Unlocks $/min and time-to-target predictions.</span></div>
       </div>
+      <button class="btn btn-primary" onclick="switchTab('log')">Log Your First Run &rarr;</button>
     </div>
     <div id="dashboard-content">
       <div class="grid-2">
@@ -442,6 +446,7 @@
               <th class="right">FUEL</th>
               <th class="right">GROSS</th>
               <th class="right">NET</th>
+              <th class="right">FUEL%</th>
               <th class="right">ODO START</th>
               <th class="right">ODO END</th>
               <th class="right">DISTANCE</th>
