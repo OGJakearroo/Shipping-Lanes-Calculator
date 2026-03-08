@@ -445,6 +445,7 @@ function applySettings(silent) {
 
   save();
   if (runs.length > 0) render();
+  renderJobComparison();
   if (!silent) {
     const el = document.getElementById('settings-saved');
     el.style.display = 'block';

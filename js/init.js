@@ -70,6 +70,9 @@ initShipSelector('route-ship', {
   if (el) el.addEventListener('input', renderRouteCalculator);
 });
 
+// Initialize job comparison with 3 blank rows
+addJobRow(); addJobRow(); addJobRow();
+
 // Render seasons list
 renderSeasons();
 

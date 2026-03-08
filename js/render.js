@@ -298,3 +298,92 @@ function renderUpgradePath() {
   html += '</div>';
   container.innerHTML = html;
 }
+
+// -- JOB COMPARISON --
+let _jcRowId = 0;
+
+function addJobRow(labelVal, distVal, payVal) {
+  const id = _jcRowId++;
+  const wrap = document.getElementById('jc-rows');
+  if (!wrap) return;
+  const row = document.createElement('div');
+  row.className = 'jc-row';
+  row.innerHTML =
+    '<input type="text" placeholder="Route name (optional)" value="' + (labelVal || '') + '" oninput="renderJobComparison()">' +
+    '<input type="number" placeholder="NM" value="' + (distVal || '') + '" min="0" oninput="renderJobComparison()">' +
+    '<input type="text" placeholder="Payout ($)" value="' + (payVal || '') + '" oninput="renderJobComparison()" onblur="formatInput(this)">' +
+    '<button class="jc-remove" onclick="this.closest(\'.jc-row\').remove();renderJobComparison()" title="Remove">&times;</button>';
+  wrap.appendChild(row);
+  renderJobComparison();
+}
+
+function renderJobComparison() {
+  // Speed: prefer settings currentShip, fallback to manual input
+  const settingsShip = findShip(settings.currentShip);
+  let speed = settingsShip ? settingsShip.speed : 0;
+  const speedEl = document.getElementById('jc-speed');
+  if (speedEl) {
+    if (settingsShip) {
+      speedEl.value = settingsShip.speed;
+      speedEl.disabled = true;
+      speedEl.title = 'Auto-filled from current ship in Settings';
+    } else {
+      speedEl.disabled = false;
+      speedEl.removeAttribute('title');
+      speed = parseFloat(speedEl.value) || 0;
+    }
+  }
+
+  const rows = document.querySelectorAll('#jc-rows .jc-row');
+  const jobs = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const label = inputs[0].value.trim() || ('Job ' + (jobs.length + 1));
+    const dist  = parseFloat(inputs[1].value) || 0;
+    const pay   = pn(inputs[2].value);
+    if (dist > 0 && pay > 0 && speed > 0) {
+      const timeMins = (dist / speed) * 60;
+      const perMin   = pay / timeMins;
+      jobs.push({ label, dist, pay, timeMins, perMin, perHr: perMin * 60 });
+    }
+  });
+
+  const resultEl = document.getElementById('jc-result');
+  if (!resultEl) return;
+  if (jobs.length === 0) { resultEl.innerHTML = ''; return; }
+
+  const bestPerMin = Math.max(...jobs.map(j => j.perMin));
+
+  let html = '<div class="table-wrap" style="margin-top:16px"><table><thead><tr>'
+    + '<th class="left">JOB</th>'
+    + '<th class="right">DIST</th>'
+    + '<th class="right">PAYOUT</th>'
+    + '<th class="right">TIME</th>'
+    + '<th class="right">$/MIN</th>'
+    + '<th class="right">$/HR</th>'
+    + '</tr></thead><tbody>';
+
+  jobs.forEach(j => {
+    const isBest = j.perMin === bestPerMin;
+    const mins = Math.floor(j.timeMins);
+    const secs = Math.round((j.timeMins - mins) * 60);
+    const timeStr = mins + 'm ' + String(secs).padStart(2, '0') + 's';
+    const rowStyle = isBest ? ' style="background:rgba(76,175,80,0.08)"' : '';
+    html += '<tr' + rowStyle + '>'
+      + '<td class="left">' + esc(j.label) + (isBest ? '<span class="jc-best-badge">&#9733; BEST</span>' : '') + '</td>'
+      + '<td class="right" style="color:var(--muted)">' + Math.round(j.dist) + ' NM</td>'
+      + '<td class="right">' + fmtf(j.pay) + '</td>'
+      + '<td class="right" style="color:var(--muted)">' + timeStr + '</td>'
+      + '<td class="right" style="color:' + (isBest ? 'var(--green)' : 'var(--text)') + ';font-weight:' + (isBest ? '600' : '400') + '">' + fmtf(Math.round(j.perMin)) + '</td>'
+      + '<td class="right" style="color:' + (isBest ? 'var(--green)' : 'var(--text)') + '">' + fmt(Math.round(j.perHr)) + '</td>'
+      + '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  if (speed > 0) {
+    const shipLabel = settingsShip ? settingsShip.name + ' (' + speed + ' kts)' : speed + ' kts';
+    html += '<div style="font-size:0.68rem;color:var(--muted);margin-top:6px;font-family:var(--mono)">Speed: ' + esc(shipLabel) + '</div>';
+  }
+
+  resultEl.innerHTML = html;
+}

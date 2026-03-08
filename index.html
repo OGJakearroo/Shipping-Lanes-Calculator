@@ -371,6 +371,23 @@
 
     <div id="route-result"></div>
 
+    <!-- JOB COMPARISON -->
+    <div class="card">
+      <div class="card-label">JOB COMPARISON</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;line-height:1.5">
+        Compare multiple in-game job offers side by side. Enter each job's payout and distance to find the best $/min.
+        Speed auto-fills from the ship selected above.
+      </div>
+      <div class="field" style="max-width:180px;margin-bottom:12px">
+        <div class="field-label">Ship Speed (knots)</div>
+        <input type="number" id="jc-speed" placeholder="e.g. 23" min="1" max="100" oninput="renderJobComparison()">
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;font-family:var(--mono);letter-spacing:0.05em">ROUTE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DIST (NM) &nbsp;&nbsp; PAYOUT ($)</div>
+      <div id="jc-rows"></div>
+      <button class="btn btn-muted" style="margin-top:8px;font-size:0.78rem;padding:6px 14px" onclick="addJobRow()">+ Add Job</button>
+      <div id="jc-result"></div>
+    </div>
+
     <div class="card">
       <div class="card-label">PORT MULTIPLIERS</div>
       <div style="font-size:0.72rem;color:var(--muted);margin-bottom:12px;line-height:1.5">
